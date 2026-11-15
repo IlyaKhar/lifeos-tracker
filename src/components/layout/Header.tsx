@@ -1,21 +1,25 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Flame, Plus } from "lucide-react";
+import { ArrowLeft, Flame, Plus, User } from "lucide-react";
 
 interface HeaderProps {
   activeModuleTitle?: string;
+  userName?: string;
   onBack?: () => void;
   onOpenQuickAction: () => void;
   onOpenAddModule: () => void;
+  onOpenProfile?: () => void;
   streakDays?: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   activeModuleTitle,
+  userName = "Малой",
   onBack,
   onOpenQuickAction,
   onOpenAddModule,
+  onOpenProfile,
   streakDays = 12,
 }) => {
   const [mounted, setMounted] = useState(false);
@@ -66,8 +70,12 @@ export const Header: React.FC<HeaderProps> = ({
                 {streakDays} дн.
               </span>
             </div>
-            <h1 className="text-lg font-extrabold tracking-tight text-white mt-0.5">
-              Мой Хаб ⚡
+            <h1
+              onClick={onOpenProfile}
+              className="text-lg font-extrabold tracking-tight text-white mt-0.5 cursor-pointer hover:text-emerald-400 transition-colors flex items-center gap-1.5"
+            >
+              <span>Привет, {userName}!</span>
+              <span className="text-sm">⚡</span>
             </h1>
           </div>
 

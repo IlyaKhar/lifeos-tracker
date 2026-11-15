@@ -7,6 +7,8 @@ import {
   SavingsGoal,
   Book,
   DailyHabit,
+  UserProfile,
+  Checkpoint,
 } from "@/types";
 import {
   initialModules,
@@ -18,8 +20,11 @@ import {
   initialBooks,
   initialHabits,
 } from "./initialData";
+import { generateSmartCheckpoints } from "./checkpoints";
 
 const STORAGE_KEYS = {
+  PROFILE: "lifeos_profile_v1",
+  CHECKPOINTS: "lifeos_checkpoints_v1",
   MODULES: "lifeos_modules_v1",
   WEIGHT_LOGS: "lifeos_weight_logs_v1",
   WORKOUTS: "lifeos_workouts_v1",
@@ -29,6 +34,19 @@ const STORAGE_KEYS = {
   BOOKS: "lifeos_books_v1",
   HABITS: "lifeos_habits_v1",
   WATER_ML: "lifeos_water_ml_v1",
+};
+
+const defaultProfile: UserProfile = {
+  name: "Малой",
+  age: 23,
+  currentWeight: 78.4,
+  targetWeight: 75.0,
+  fitnessGoal: "lose_weight",
+  focusCategories: ["gym", "3d", "savings", "reading", "english", "work"],
+  savingsTargetName: "3D-принтер Bambu Lab P1S",
+  savingsTargetAmount: 95000,
+  isOnboarded: false, // will show survey if false
+  createdAt: new Date().toISOString(),
 };
 
 function safeGet<T>(key: string, fallback: T): T {
@@ -52,6 +70,30 @@ function safeSet<T>(key: string, value: T): void {
 }
 
 export const StorageService = {
+  getProfile: (): UserProfile => safeGet(STORAGE_KEYS.PROFILE, defaultProfile),
+  saveProfile: (profile: UserProfile): void => {
+    safeSet(STORAGE_KEYS.PROFILE, profile);
+    // Generate corresponding checkpoints
+    const checkpoints = generateSmartCheckpoints(profile);
+    safeSet(STORAGE_KEYS.CHECKPOINTS, checkpoints);
+
+    // Also update weight log starting point
+    StorageService.addWeightLog(profile.currentWeight);
+  },
+
+  getCheckpoints: (): Checkpoint[] => {
+    const profile = StorageService.getProfile();
+    const fallback = generateSmartCheckpoints(profile);
+    return safeGet(STORAGE_KEYS.CHECKPOINTS, fallback);
+  },
+  saveCheckpoints: (cps: Checkpoint[]): void => safeSet(STORAGE_KEYS.CHECKPOINTS, cps),
+  toggleCheckpoint: (id: string): Checkpoint[] => {
+    const current = StorageService.getCheckpoints();
+    const updated = current.map((c) => (c.id === id ? { ...c, completed: !c.completed } : c));
+    StorageService.saveCheckpoints(updated);
+    return updated;
+  },
+
   getModules: (): ModuleItem[] => safeGet(STORAGE_KEYS.MODULES, initialModules),
   saveModules: (modules: ModuleItem[]) => safeSet(STORAGE_KEYS.MODULES, modules),
 
@@ -118,4 +160,3 @@ export const StorageService = {
   getWater: (): number => safeGet(STORAGE_KEYS.WATER_ML, 1750),
   saveWater: (ml: number) => safeSet(STORAGE_KEYS.WATER_ML, ml),
 };
-

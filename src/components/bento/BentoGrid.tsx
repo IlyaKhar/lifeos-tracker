@@ -1,30 +1,44 @@
 "use client";
 
 import React from "react";
-import { ModuleItem } from "@/types";
-import { ArrowRight, Droplets, Plus, CheckCircle2, Circle } from "lucide-react";
+import { ModuleItem, Checkpoint } from "@/types";
+import { ArrowRight, Droplets, Plus } from "lucide-react";
+import { CheckpointsWidget } from "@/components/roadmap/CheckpointsWidget";
 
 interface BentoGridProps {
   modules: ModuleItem[];
   waterMl: number;
+  checkpoints: Checkpoint[];
   onAddWater: (amountMl: number) => void;
   onSelectModule: (module: ModuleItem) => void;
   onOpenAddModule: () => void;
+  onToggleCheckpoint: (id: string) => void;
+  onEditProfile: () => void;
 }
 
 export const BentoGrid: React.FC<BentoGridProps> = ({
   modules,
   waterMl,
+  checkpoints,
   onAddWater,
   onSelectModule,
   onOpenAddModule,
+  onToggleCheckpoint,
+  onEditProfile,
 }) => {
   const targetWater = 2500;
   const waterPercent = Math.min(100, Math.round((waterMl / targetWater) * 100));
 
   return (
     <div className="space-y-4">
-      {/* Quick Water Widget */}
+      {/* 1. Smart Checkpoints Roadmap */}
+      <CheckpointsWidget
+        checkpoints={checkpoints}
+        onToggleCheckpoint={onToggleCheckpoint}
+        onEditProfile={onEditProfile}
+      />
+
+      {/* 2. Quick Water Widget */}
       <div className="glass-card p-3.5 rounded-2xl flex items-center justify-between border border-blue-500/20 bg-gradient-to-r from-blue-950/30 via-slate-900/60 to-slate-900/60">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
@@ -46,8 +60,8 @@ export const BentoGrid: React.FC<BentoGridProps> = ({
         </button>
       </div>
 
-      {/* Bento Grid Header */}
-      <div className="flex items-center justify-between px-1">
+      {/* 3. Bento Grid Header */}
+      <div className="flex items-center justify-between px-1 pt-1">
         <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
           Сферы & Модули
         </span>
@@ -56,7 +70,7 @@ export const BentoGrid: React.FC<BentoGridProps> = ({
 
       {/* Grid of Bento Rectangles */}
       <div className="grid grid-cols-2 gap-3">
-        {modules.map((mod, index) => {
+        {modules.map((mod) => {
           const isGym = mod.category === "gym";
           return (
             <div
@@ -120,4 +134,3 @@ export const BentoGrid: React.FC<BentoGridProps> = ({
     </div>
   );
 };
-

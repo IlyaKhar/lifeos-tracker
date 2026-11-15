@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ModuleItem } from "@/types";
+import { ModuleItem, UserProfile, Checkpoint } from "@/types";
 import { initialModules } from "@/lib/initialData";
 import { StorageService } from "@/lib/storage";
 import { Header } from "@/components/layout/Header";
@@ -15,19 +15,31 @@ import { WorkModule } from "@/components/modules/WorkModule";
 import { CustomModule } from "@/components/modules/CustomModule";
 import { QuickActionModal } from "@/components/modals/QuickActionModal";
 import { AddModuleModal } from "@/components/modals/AddModuleModal";
+import { OnboardingModal } from "@/components/onboarding/OnboardingModal";
 
 export default function Home() {
   const [modules, setModules] = useState<ModuleItem[]>(initialModules);
   const [activeModule, setActiveModule] = useState<ModuleItem | null>(null);
   const [waterMl, setWaterMl] = useState(1750);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
+
+  // Modals
   const [isQuickActionOpen, setIsQuickActionOpen] = useState(false);
   const [isAddModuleOpen, setIsAddModuleOpen] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
 
   useEffect(() => {
+    const prof = StorageService.getProfile();
+    setProfile(prof);
     setModules(StorageService.getModules());
     setWaterMl(StorageService.getWater());
-    setIsLoaded(true);
+    setCheckpoints(StorageService.getCheckpoints());
+
+    // Show onboarding if first time
+    if (!prof.isOnboarded) {
+      setIsOnboardingOpen(true);
+    }
   }, []);
 
   const handleAddWater = (deltaMl: number) => {
@@ -75,14 +87,29 @@ export default function Home() {
     StorageService.saveModules(updated);
   };
 
+  const handleToggleCheckpoint = (id: string) => {
+    const updated = StorageService.toggleCheckpoint(id);
+    setCheckpoints(updated);
+  };
+
+  const handleCompleteOnboarding = (updatedProfile: UserProfile) => {
+    StorageService.saveProfile(updatedProfile);
+    setProfile(updatedProfile);
+    setCheckpoints(StorageService.getCheckpoints());
+    setModules(StorageService.getModules());
+    setIsOnboardingOpen(false);
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-950 max-w-lg mx-auto border-x border-white/5 relative shadow-2xl">
       {/* Top App Header */}
       <Header
         activeModuleTitle={activeModule ? `${activeModule.icon} ${activeModule.title}` : undefined}
+        userName={profile?.name || "Малой"}
         onBack={() => setActiveModule(null)}
         onOpenQuickAction={() => setIsQuickActionOpen(true)}
         onOpenAddModule={() => setIsAddModuleOpen(true)}
+        onOpenProfile={() => setIsOnboardingOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -91,9 +118,12 @@ export default function Home() {
           <BentoGrid
             modules={modules}
             waterMl={waterMl}
+            checkpoints={checkpoints}
             onAddWater={handleAddWater}
             onSelectModule={(mod) => setActiveModule(mod)}
             onOpenAddModule={() => setIsAddModuleOpen(true)}
+            onToggleCheckpoint={handleToggleCheckpoint}
+            onEditProfile={() => setIsOnboardingOpen(true)}
           />
         ) : (
           <div className="animate-in fade-in slide-in-from-bottom-2 duration-200">
@@ -108,7 +138,15 @@ export default function Home() {
         )}
       </main>
 
-      {/* Modals */}
+      {/* Onboarding / Profile Setup Survey */}
+      <OnboardingModal
+        isOpen={isOnboardingOpen}
+        onComplete={handleCompleteOnboarding}
+        onClose={profile?.isOnboarded ? () => setIsOnboardingOpen(false) : undefined}
+        initialProfile={profile || undefined}
+      />
+
+      {/* Quick Action Modal */}
       <QuickActionModal
         isOpen={isQuickActionOpen}
         onClose={() => setIsQuickActionOpen(false)}
@@ -118,6 +156,7 @@ export default function Home() {
         onAddBookPages={handleAddBookPages}
       />
 
+      {/* Add Custom Module Modal */}
       <AddModuleModal
         isOpen={isAddModuleOpen}
         onClose={() => setIsAddModuleOpen(false)}

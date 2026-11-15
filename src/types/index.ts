@@ -6,11 +6,41 @@ export interface ModuleItem {
   subtitle: string;
   category: ModuleCategory;
   icon: string;
-  accentColor: string; // Tailwind class or hex
+  accentColor: string;
   borderColor: string;
   previewValue: string;
   previewSubtext: string;
   isCustom?: boolean;
+}
+
+// USER PROFILE & ONBOARDING
+export type FitnessGoal = 'lose_weight' | 'build_muscle' | 'strength' | 'keep_fit';
+
+export interface UserProfile {
+  name: string;
+  age: number;
+  currentWeight: number;
+  targetWeight: number;
+  fitnessGoal: FitnessGoal;
+  focusCategories: ModuleCategory[];
+  savingsTargetName: string;
+  savingsTargetAmount: number;
+  isOnboarded: boolean;
+  createdAt: string;
+}
+
+// SMART CHECKPOINTS / ROADMAP
+export interface Checkpoint {
+  id: string;
+  category: ModuleCategory;
+  title: string;
+  description: string;
+  badge: string;
+  currentValue: number;
+  targetValue: number;
+  unit: string;
+  completed: boolean;
+  createdAt: string;
 }
 
 // GYM
@@ -122,4 +152,3 @@ export interface DailyMetrics {
   proteinGrams: number;
   focusMinutes: number;
 }
-
