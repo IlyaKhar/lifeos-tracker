@@ -217,18 +217,87 @@ export async function POST(req: Request) {
           ? "https://openrouter.ai/api/v1/chat/completions"
           : "https://api.openai.com/v1/chat/completions";
 
-        const candidateModels = isGroq
-          ? ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
-          : isOpenRouter
-          ? [
-              "meta-llama/llama-3.3-70b-instruct:free",
-              "google/gemini-2.0-flash-exp:free",
-              "deepseek/deepseek-chat:free",
-              "qwen/qwen-2.5-72b-instruct:free",
-            ]
-          : ["gpt-4o-mini", "gpt-3.5-turbo"];
+        let candidateModels: string[] = [];
 
-        let lastOaiError = "";
+        if (isGroq) {
+          // Dynamic model discovery: fetch exact active models available to this specific Groq key
+          try {
+            const modelsRes = await fetch("https://api.groq.com/openai/v1/models", {
+              headers: { Authorization: `Bearer ${rawKey}` },
+            });
+
+            if (modelsRes.ok) {
+              const modelsJson = await modelsRes.json();
+              const activeIds: string[] = (modelsJson.data || [])
+                .map((m: any) => m.id as string)
+                .filter(
+                  (id: string) =>
+                    id &&
+                    !id.includes("whisper") &&
+                    !id.includes("guard") &&
+                    !id.includes("embed") &&
+                    !id.includes("tts")
+                );
+
+              // Sort prioritizing versatile & high quality models:
+              // 1. llama-3.3-70b-versatile or 70b / 120b
+              // 2. llama-3.1 / llama3 / qwen
+              // 3. other instruct models
+              activeIds.sort((a, b) => {
+                const getWeight = (id: string) => {
+                  let w = 0;
+                  if (id.includes("llama-3.3-70b")) w += 100;
+                  else if (id.includes("70b") || id.includes("120b")) w += 80;
+                  else if (id.includes("llama-3.3")) w += 70;
+                  else if (id.includes("llama-3.1")) w += 60;
+                  else if (id.includes("llama3")) w += 50;
+                  else if (id.includes("qwen")) w += 40;
+                  else if (id.includes("mixtral")) w += 30;
+                  else if (id.includes("gemma")) w += 20;
+                  return w;
+                };
+                return getWeight(b) - getWeight(a);
+              });
+
+              if (activeIds.length > 0) {
+                candidateModels = activeIds;
+              }
+            } else {
+              const err = await modelsRes.json().catch(() => ({}));
+              if (err?.error?.message) {
+                return NextResponse.json({
+                  reply: `⚠️ Ошибка авторизации Groq: ${err.error.message}`,
+                });
+              }
+            }
+          } catch (e) {
+            // fallback if discovery endpoint fails
+          }
+
+          if (candidateModels.length === 0) {
+            candidateModels = [
+              "llama-3.3-70b-versatile",
+              "llama-3.1-70b-versatile",
+              "llama-3.2-3b-preview",
+              "llama-3.2-1b-preview",
+              "llama3-70b-8192",
+              "llama3-8b-8192",
+              "mixtral-8x7b-32768",
+              "gemma2-9b-it",
+            ];
+          }
+        } else if (isOpenRouter) {
+          candidateModels = [
+            "meta-llama/llama-3.3-70b-instruct:free",
+            "google/gemini-2.0-flash-exp:free",
+            "deepseek/deepseek-chat:free",
+            "qwen/qwen-2.5-72b-instruct:free",
+          ];
+        } else {
+          candidateModels = ["gpt-4o-mini", "gpt-3.5-turbo"];
+        }
+
+        const errorsLog: string[] = [];
 
         for (const model of candidateModels) {
           try {
@@ -251,6 +320,8 @@ export async function POST(req: Request) {
                   { role: "system", content: systemInstruction },
                   { role: "user", content: prompt },
                 ],
+                temperature: 0.7,
+                max_tokens: 1024,
               }),
             });
 
@@ -262,15 +333,16 @@ export async function POST(req: Request) {
               }
             } else {
               const errData = await oaiRes.json().catch(() => ({}));
-              lastOaiError = errData?.error?.message || oaiRes.statusText;
+              const msg = errData?.error?.message || oaiRes.statusText;
+              errorsLog.push(`${model}: ${msg}`);
             }
           } catch (modelErr: any) {
-            lastOaiError = modelErr?.message || String(modelErr);
+            errorsLog.push(`${model}: ${modelErr?.message || String(modelErr)}`);
           }
         }
 
         return NextResponse.json({
-          reply: `⚠️ Ошибка провайдера ${providerName}: ${lastOaiError}`,
+          reply: `⚠️ Ошибка провайдера ${providerName}:\n${errorsLog.slice(0, 3).join("\n")}`,
         });
       } catch (e: any) {
         return NextResponse.json({
