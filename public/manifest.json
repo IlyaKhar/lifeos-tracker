@@ -1,0 +1,16 @@
+{
+  "name": "LifeOS Tracker",
+  "short_name": "LifeOS",
+  "description": "Персональный трекер привычек, зала, 3D-печати и финансов",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#090d16",
+  "theme_color": "#090d16",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

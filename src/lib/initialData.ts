@@ -1,0 +1,262 @@
+import { ModuleItem, FilamentSpool, PrintJob, SavingsGoal, Book, DailyHabit, WorkoutSession, BodyWeightLog } from "@/types";
+
+export const initialModules: ModuleItem[] = [
+  {
+    id: "gym",
+    title: "Зал & Тело",
+    subtitle: "Прогрессия, веса, БЖУ",
+    category: "gym",
+    icon: "🏋️",
+    accentColor: "from-emerald-500/15 text-emerald-500",
+    borderColor: "border-emerald-500/30 hover:border-emerald-500",
+    previewValue: "78.4 кг 📉",
+    previewSubtext: "Жим: 85 кг × 6 (PR)",
+  },
+  {
+    id: "3d",
+    title: "3D Печать",
+    subtitle: "Катушки, очередь, себестоимость",
+    category: "3d",
+    icon: "🖨️",
+    accentColor: "from-orange-500/15 text-orange-500",
+    borderColor: "border-orange-500/30 hover:border-orange-500",
+    previewValue: "68%",
+    previewSubtext: "Корпус Raspberry Pi",
+  },
+  {
+    id: "savings",
+    title: "Накопления",
+    subtitle: "Цели и копилки",
+    category: "savings",
+    icon: "💰",
+    accentColor: "from-amber-500/15 text-amber-500",
+    borderColor: "border-amber-500/30 hover:border-amber-500",
+    previewValue: "65 000 ₽",
+    previewSubtext: "Bambu Lab P1S (68%)",
+  },
+  {
+    id: "english",
+    title: "Английский",
+    subtitle: "Словарный запас & практика",
+    category: "english",
+    icon: "🇬🇧",
+    accentColor: "from-sky-500/15 text-sky-500",
+    borderColor: "border-sky-500/30 hover:border-sky-500",
+    previewValue: "+20 слов",
+    previewSubtext: "Стрик 12 дней 🔥",
+  },
+  {
+    id: "reading",
+    title: "Книги",
+    subtitle: "Трекинг страниц и цитаты",
+    category: "reading",
+    icon: "📚",
+    accentColor: "from-purple-500/15 text-purple-500",
+    borderColor: "border-purple-500/30 hover:border-purple-500",
+    previewValue: "142 / 320",
+    previewSubtext: "Чистый код (44%)",
+  },
+  {
+    id: "work",
+    title: "Учеба & Работа",
+    subtitle: "Фокус-сессии и спринты",
+    category: "work",
+    icon: "💼",
+    accentColor: "from-indigo-500/15 text-indigo-500",
+    borderColor: "border-indigo-500/30 hover:border-indigo-500",
+    previewValue: "3 задачи",
+    previewSubtext: "2.5 ч Pomodoro",
+  },
+];
+
+export const initialWeightLogs: BodyWeightLog[] = [
+  { id: "1", date: "2026-11-09", weightKg: 79.2 },
+  { id: "2", date: "2026-11-10", weightKg: 79.0 },
+  { id: "3", date: "2026-11-11", weightKg: 78.8 },
+  { id: "4", date: "2026-11-12", weightKg: 78.9 },
+  { id: "5", date: "2026-11-13", weightKg: 78.6 },
+  { id: "6", date: "2026-11-14", weightKg: 78.5 },
+  { id: "7", date: "2026-11-15", weightKg: 78.4 },
+];
+
+export const initialWorkouts: WorkoutSession[] = [
+  {
+    id: "w1",
+    date: "2026-11-14",
+    name: "Грудь и Плечи (Силовая A)",
+    durationMinutes: 65,
+    notes: "Отличный темп, прибавил в жиме!",
+    exercises: [
+      {
+        id: "e1",
+        name: "Жим штанги лежа",
+        targetSets: 3,
+        isPR: true,
+        sets: [
+          { id: "s1", setNumber: 1, weightKg: 80, reps: 10, completed: true, rpe: 8 },
+          { id: "s2", setNumber: 2, weightKg: 82.5, reps: 8, completed: true, rpe: 8.5 },
+          { id: "s3", setNumber: 3, weightKg: 85, reps: 6, completed: true, rpe: 9.5 },
+        ],
+      },
+      {
+        id: "e2",
+        name: "Армейский жим стоя",
+        targetSets: 3,
+        sets: [
+          { id: "s4", setNumber: 1, weightKg: 40, reps: 10, completed: true, rpe: 7.5 },
+          { id: "s5", setNumber: 2, weightKg: 45, reps: 8, completed: true, rpe: 8 },
+          { id: "s6", setNumber: 3, weightKg: 45, reps: 7, completed: true, rpe: 9 },
+        ],
+      },
+      {
+        id: "e3",
+        name: "Разводка гантелей в наклоне",
+        targetSets: 3,
+        sets: [
+          { id: "s7", setNumber: 1, weightKg: 12, reps: 12, completed: true },
+          { id: "s8", setNumber: 2, weightKg: 14, reps: 10, completed: true },
+          { id: "s9", setNumber: 3, weightKg: 14, reps: 10, completed: true },
+        ],
+      },
+    ],
+  },
+];
+
+export const initialSpools: FilamentSpool[] = [
+  {
+    id: "sp1",
+    brand: "Kingroon",
+    material: "PLA",
+    colorName: "Black",
+    colorHex: "#1c1917",
+    totalWeightGrams: 1000,
+    remainingWeightGrams: 680,
+    nozzleTemp: 210,
+    bedTemp: 60,
+    priceRub: 1200,
+  },
+  {
+    id: "sp2",
+    brand: "FDPlast",
+    material: "PETG",
+    colorName: "Cyan",
+    colorHex: "#06b6d4",
+    totalWeightGrams: 1000,
+    remainingWeightGrams: 320,
+    nozzleTemp: 235,
+    bedTemp: 80,
+    priceRub: 950,
+  },
+  {
+    id: "sp3",
+    brand: "eSUN",
+    material: "PLA",
+    colorName: "Matte White",
+    colorHex: "#f8fafc",
+    totalWeightGrams: 1000,
+    remainingWeightGrams: 910,
+    nozzleTemp: 205,
+    bedTemp: 55,
+    priceRub: 1600,
+  },
+];
+
+export const initialPrintJobs: PrintJob[] = [
+  {
+    id: "pj1",
+    title: "Корпус Raspberry Pi 5 v2",
+    spoolId: "sp1",
+    weightGrams: 45,
+    estimatedDuration: "2ч 30м",
+    costRub: 54,
+    status: "printing",
+    progressPercent: 68,
+    dateAdded: "2026-11-15 13:20",
+  },
+  {
+    id: "pj2",
+    title: "Крепление наушников под стол",
+    spoolId: "sp2",
+    weightGrams: 85,
+    estimatedDuration: "4ч 10м",
+    costRub: 81,
+    status: "queued",
+    progressPercent: 0,
+    dateAdded: "2026-11-15 14:00",
+  },
+  {
+    id: "pj3",
+    title: "Шестерня механизма экструдера",
+    spoolId: "sp2",
+    weightGrams: 12,
+    estimatedDuration: "45м",
+    costRub: 12,
+    status: "completed",
+    progressPercent: 100,
+    dateAdded: "2026-11-14",
+  },
+];
+
+export const initialSavingsGoals: SavingsGoal[] = [
+  {
+    id: "sg1",
+    title: "3D-принтер Bambu Lab P1S",
+    icon: "🖨️",
+    targetAmount: 95000,
+    currentAmount: 65000,
+    currency: "₽",
+    color: "amber",
+  },
+  {
+    id: "sg2",
+    title: "Подушка безопасности (3 мес)",
+    icon: "🛡️",
+    targetAmount: 150000,
+    currentAmount: 50000,
+    currency: "₽",
+    color: "emerald",
+  },
+  {
+    id: "sg3",
+    title: "Поездка в горы / Отпуск",
+    icon: "🏔️",
+    targetAmount: 70000,
+    currentAmount: 22000,
+    currency: "₽",
+    color: "sky",
+  },
+];
+
+export const initialBooks: Book[] = [
+  {
+    id: "b1",
+    title: "Чистый код",
+    author: "Роберт Мартин",
+    totalPages: 320,
+    currentPage: 142,
+    status: "reading",
+  },
+  {
+    id: "b2",
+    title: "Атомные привычки",
+    author: "Джеймс Клир",
+    totalPages: 300,
+    currentPage: 300,
+    status: "completed",
+  },
+  {
+    id: "b3",
+    title: "Выразительный JavaScript",
+    author: "Марейн Хавербеке",
+    totalPages: 480,
+    currentPage: 0,
+    status: "planned",
+  },
+];
+
+export const initialHabits: DailyHabit[] = [
+  { id: "h1", title: "Тренировка в зале", icon: "🏋️", completed: true, streakDays: 4 },
+  { id: "h2", title: "20 новых слов в English", icon: "🇬🇧", completed: true, streakDays: 12 },
+  { id: "h3", title: "Чтение 20 страниц", icon: "📚", completed: false, streakDays: 8 },
+  { id: "h4", title: "Ревью кода и задачи по работе", icon: "💼", completed: false, streakDays: 19 },
+];
