@@ -260,3 +260,4 @@ export const initialHabits: DailyHabit[] = [
   { id: "h3", title: "Чтение 20 страниц", icon: "📚", completed: false, streakDays: 8 },
   { id: "h4", title: "Ревью кода и задачи по работе", icon: "💼", completed: false, streakDays: 19 },
 ];
+

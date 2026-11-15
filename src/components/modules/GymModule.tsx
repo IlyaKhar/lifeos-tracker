@@ -365,3 +365,4 @@ export const GymModule: React.FC = () => {
     </div>
   );
 };
+

@@ -157,3 +157,4 @@ export const AddModuleModal: React.FC<AddModuleModalProps> = ({ isOpen, onClose,
     </div>
   );
 };
+

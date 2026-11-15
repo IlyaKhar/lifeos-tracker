@@ -118,3 +118,4 @@ export const StorageService = {
   getWater: (): number => safeGet(STORAGE_KEYS.WATER_ML, 1750),
   saveWater: (ml: number) => safeSet(STORAGE_KEYS.WATER_ML, ml),
 };
+

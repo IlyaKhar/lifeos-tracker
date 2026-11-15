@@ -122,3 +122,4 @@ export interface DailyMetrics {
   proteinGrams: number;
   focusMinutes: number;
 }
+

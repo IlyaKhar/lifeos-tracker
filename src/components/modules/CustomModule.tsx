@@ -107,3 +107,4 @@ export const CustomModule: React.FC<CustomModuleProps> = ({ module }) => {
     </div>
   );
 };
+
