@@ -16,6 +16,8 @@ interface BentoGridProps {
   onToggleCheckpoint: (id: string) => void;
   onEditProfile: () => void;
   onOpenEditCheckpoint: (cp: Checkpoint | null) => void;
+  onDeleteCheckpoint?: (id: string) => void;
+  onClearAllCheckpoints?: () => void;
 }
 
 const COLOR_CONFIGS: Record<string, { bg: string; text: string }> = {
@@ -37,6 +39,8 @@ export const BentoGrid: React.FC<BentoGridProps> = ({
   onToggleCheckpoint,
   onEditProfile,
   onOpenEditCheckpoint,
+  onDeleteCheckpoint,
+  onClearAllCheckpoints,
 }) => {
   const targetWater = 2500;
   const waterPercent = Math.min(100, Math.round((waterMl / targetWater) * 100));
@@ -49,6 +53,8 @@ export const BentoGrid: React.FC<BentoGridProps> = ({
         onToggleCheckpoint={onToggleCheckpoint}
         onEditProfile={onEditProfile}
         onOpenEditCheckpoint={onOpenEditCheckpoint}
+        onDeleteCheckpoint={onDeleteCheckpoint}
+        onClearAllCheckpoints={onClearAllCheckpoints}
       />
 
       {/* 2. Apple Health Style Water Widget */}

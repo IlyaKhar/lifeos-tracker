@@ -81,6 +81,16 @@ export const AICoachModal: React.FC<AICoachModalProps> = ({ isOpen, onClose, use
     "🇬🇧 5 крутых фраз на каждый день",
   ];
 
+  const providerLabel = apiKey.startsWith("gsk_")
+    ? "GROQ (LLAMA 3.3)"
+    : apiKey.startsWith("AQ.") || apiKey.startsWith("AIza")
+    ? "GEMINI LIVE"
+    : apiKey.startsWith("sk-or-")
+    ? "OPENROUTER"
+    : apiKey.startsWith("sk-")
+    ? "OPENAI"
+    : "SMART AI";
+
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
       <div className="w-full max-w-md apple-card rounded-3xl p-5 shadow-2xl flex flex-col h-[540px] relative">
@@ -94,7 +104,7 @@ export const AICoachModal: React.FC<AICoachModalProps> = ({ isOpen, onClose, use
               <h3 className="text-sm font-bold text-white tracking-tight flex items-center gap-1.5">
                 <span>AI Коуч LifeOS</span>
                 <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400">
-                  {apiKey ? "GEMINI LIVE" : "FREE AI"}
+                  {providerLabel}
                 </span>
               </h3>
               <p className="text-[10px] text-slate-400">Умные советы по залу, финансам и целям</p>
@@ -108,7 +118,7 @@ export const AICoachModal: React.FC<AICoachModalProps> = ({ isOpen, onClose, use
                   ? "bg-emerald-500/20 text-emerald-400"
                   : "bg-white/[0.05] hover:bg-white/[0.1] text-slate-400 hover:text-white"
               }`}
-              title="Настройки Gemini API ключа"
+              title="Настройки API ключа"
             >
               <Key className="w-3.5 h-3.5" />
             </button>
@@ -121,32 +131,44 @@ export const AICoachModal: React.FC<AICoachModalProps> = ({ isOpen, onClose, use
           </div>
         </div>
 
-        {/* Optional Custom Gemini Key Input */}
+        {/* Optional Custom API Key Input */}
         {showKeyInput && (
-          <div className="p-3 rounded-2xl bg-[#1b1f2a] border border-white/[0.08] my-2 space-y-1.5">
+          <div className="p-3 rounded-2xl bg-[#1b1f2a] border border-white/[0.08] my-2 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold text-emerald-400">
-                Бесплатный ключ Gemini API
+                Подключение реального ИИ
               </span>
-              <a
-                href="https://aistudio.google.com/app/apikey"
-                target="_blank"
-                rel="noreferrer"
-                className="text-[10px] text-sky-400 hover:underline flex items-center gap-0.5"
-              >
-                <span>Получить за 15 сек</span>
-                <ExternalLink className="w-2.5 h-2.5" />
-              </a>
+              <div className="flex items-center gap-2">
+                <a
+                  href="https://console.groq.com/keys"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[10px] text-emerald-400 hover:underline flex items-center gap-0.5 font-bold"
+                >
+                  <span>Groq (10 сек)</span>
+                  <ExternalLink className="w-2.5 h-2.5" />
+                </a>
+                <span className="text-slate-600">•</span>
+                <a
+                  href="https://aistudio.google.com/app/apikey"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[10px] text-sky-400 hover:underline flex items-center gap-0.5"
+                >
+                  <span>Gemini</span>
+                  <ExternalLink className="w-2.5 h-2.5" />
+                </a>
+              </div>
             </div>
-            <p className="text-[9px] text-slate-400">
-              Вставь ключ от Google AI Studio — он сохранится в твоем браузере и сделает ИИ живой и безлимитной:
+            <p className="text-[9px] text-slate-400 leading-relaxed">
+              💡 <strong>Groq</strong> (ключ <code className="text-emerald-300">gsk_...</code>) — работает бесплатно, регистрация через Google в 1 клик, без Cloud-проектов и ограничений! Или вставь Gemini (<code className="text-sky-300">AQ.</code> / <code className="text-sky-300">AIza</code>).
             </p>
             <input
-              type="password"
-              placeholder="AIzaSy..."
+              type="text"
+              placeholder="Вставь ключ (gsk_... или AQ.... или AIzaSy...)"
               value={apiKey}
               onChange={(e) => handleSaveApiKey(e.target.value)}
-              className="w-full bg-black/40 border border-white/[0.08] rounded-xl px-2.5 py-1 text-xs text-white font-mono"
+              className="w-full bg-black/40 border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-white font-mono"
             />
           </div>
         )}

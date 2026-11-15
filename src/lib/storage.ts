@@ -354,7 +354,12 @@ export const StorageService = {
   },
 
   // Savings
-  getSavingsGoals: (): SavingsGoal[] => safeGet(STORAGE_KEYS.SAVINGS, initialSavingsGoals),
+  getSavingsGoals: (): SavingsGoal[] => {
+    const raw = safeGet<SavingsGoal[]>(STORAGE_KEYS.SAVINGS, initialSavingsGoals);
+    // Auto-purge old mock goal "sg1" (Bambu Lab 65 000 ₽) that caused desync
+    const cleaned = raw.filter((g) => g.id !== "sg1");
+    return cleaned.length > 0 ? cleaned : initialSavingsGoals;
+  },
   saveSavingsGoals: (goals: SavingsGoal[]) => safeSet(STORAGE_KEYS.SAVINGS, goals),
   deleteSavingsGoal: (id: string): SavingsGoal[] => {
     const current = StorageService.getSavingsGoals();
@@ -374,13 +379,40 @@ export const StorageService = {
   },
 
   // Books
-  getBooks: (): Book[] => safeGet(STORAGE_KEYS.BOOKS, []),
+  getBooks: (): Book[] => {
+    const raw = safeGet<Book[]>(STORAGE_KEYS.BOOKS, []);
+    // Auto-purge old mock book "Чистый код" (142/320)
+    return raw.filter((b) => b.id !== "b1");
+  },
   saveBooks: (books: Book[]) => safeSet(STORAGE_KEYS.BOOKS, books),
   deleteBook: (id: string): Book[] => {
     const current = StorageService.getBooks();
     const updated = current.filter((b) => b.id !== id);
     StorageService.saveBooks(updated);
     return updated;
+  },
+
+  // Complete Reset of Demo Data (clean slate with all counters at zero)
+  resetAllDemoData: (): void => {
+    const profile = StorageService.getProfile();
+    const cleanGoals: SavingsGoal[] = [
+      {
+        id: "sg_main",
+        title: profile.savingsTargetName || "Пассат Б6",
+        icon: "car",
+        targetAmount: profile.savingsTargetAmount || 700000,
+        currentAmount: 0,
+        currency: "₽",
+        color: "amber",
+      },
+    ];
+    StorageService.saveSavingsGoals(cleanGoals);
+    StorageService.saveBooks([]);
+    StorageService.savePrintModels([]);
+    StorageService.saveCheckpoints([]);
+    StorageService.saveEnglishWords([]);
+    StorageService.saveWater(0);
+    StorageService.saveWorkTasks([]);
   },
 
   // Work & Study Tasks

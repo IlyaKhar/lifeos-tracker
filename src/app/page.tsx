@@ -93,6 +93,19 @@ export default function Home() {
     setIsEditCheckpointOpen(false);
   };
 
+  const handleClearAllCheckpoints = () => {
+    StorageService.saveCheckpoints([]);
+    setCheckpoints([]);
+  };
+
+  const handleResetAllData = () => {
+    if (confirm("Точно сбросить все демо-данные в 0, чтобы заполнить всё полностью под себя?")) {
+      StorageService.resetAllDemoData();
+      refreshData();
+      setIsOnboardingOpen(false);
+    }
+  };
+
   const handleCompleteOnboarding = (updatedProfile: UserProfile) => {
     StorageService.saveProfile(updatedProfile);
     setProfile(updatedProfile);
@@ -130,6 +143,8 @@ export default function Home() {
             onToggleCheckpoint={handleToggleCheckpoint}
             onEditProfile={() => setIsOnboardingOpen(true)}
             onOpenEditCheckpoint={handleOpenEditCheckpoint}
+            onDeleteCheckpoint={handleDeleteCheckpoint}
+            onClearAllCheckpoints={handleClearAllCheckpoints}
           />
         ) : (
           <div className="animate-in fade-in slide-in-from-bottom-2 duration-200">
@@ -160,6 +175,7 @@ export default function Home() {
         onComplete={handleCompleteOnboarding}
         onClose={profile?.isOnboarded ? () => setIsOnboardingOpen(false) : undefined}
         initialProfile={profile || undefined}
+        onResetAllData={handleResetAllData}
       />
 
       {/* Add Custom Module Modal */}

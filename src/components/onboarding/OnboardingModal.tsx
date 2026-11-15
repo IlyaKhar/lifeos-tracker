@@ -10,6 +10,7 @@ interface OnboardingModalProps {
   onComplete: (profile: UserProfile) => void;
   onClose?: () => void;
   initialProfile?: UserProfile;
+  onResetAllData?: () => void;
 }
 
 export const OnboardingModal: React.FC<OnboardingModalProps> = ({
@@ -17,6 +18,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   onComplete,
   onClose,
   initialProfile,
+  onResetAllData,
 }) => {
   const [step, setStep] = useState(1);
 
@@ -279,6 +281,18 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
             </button>
           )}
         </div>
+
+        {onResetAllData && (
+          <div className="pt-2 text-center">
+            <button
+              type="button"
+              onClick={onResetAllData}
+              className="text-[11px] text-red-400/80 hover:text-red-400 hover:underline transition-colors py-1"
+            >
+              🗑️ Сбросить все демо-данные в 0 под себя
+            </button>
+          </div>
+        )}
 
       </div>
     </div>

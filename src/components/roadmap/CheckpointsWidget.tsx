@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Checkpoint } from "@/types";
-import { CheckCircle2, Circle, Trophy, SlidersHorizontal, Plus, ChevronRight } from "lucide-react";
+import { CheckCircle2, Circle, Trophy, SlidersHorizontal, Plus, ChevronRight, Trash2 } from "lucide-react";
 import { AppIcon } from "@/components/common/AppIcon";
 import confetti from "canvas-confetti";
 
@@ -11,6 +11,8 @@ interface CheckpointsWidgetProps {
   onToggleCheckpoint: (id: string) => void;
   onEditProfile: () => void;
   onOpenEditCheckpoint: (cp: Checkpoint | null) => void;
+  onDeleteCheckpoint?: (id: string) => void;
+  onClearAllCheckpoints?: () => void;
 }
 
 export const CheckpointsWidget: React.FC<CheckpointsWidgetProps> = ({
@@ -18,6 +20,8 @@ export const CheckpointsWidget: React.FC<CheckpointsWidgetProps> = ({
   onToggleCheckpoint,
   onEditProfile,
   onOpenEditCheckpoint,
+  onDeleteCheckpoint,
+  onClearAllCheckpoints,
 }) => {
   const completedCount = checkpoints.filter((c) => c.completed).length;
   const total = checkpoints.length;
@@ -50,6 +54,16 @@ export const CheckpointsWidget: React.FC<CheckpointsWidgetProps> = ({
         </div>
 
         <div className="flex items-center gap-1.5">
+          {total > 0 && onClearAllCheckpoints && (
+            <button
+              onClick={() => onClearAllCheckpoints()}
+              className="p-1 px-2 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-all text-[11px] font-semibold flex items-center gap-1 active:scale-95"
+              title="Очистить все цели"
+            >
+              <Trash2 className="w-3 h-3" />
+              <span>Очистить</span>
+            </button>
+          )}
           <button
             onClick={() => onOpenEditCheckpoint(null)}
             className="p-1 px-2.5 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 transition-all text-[11px] font-semibold flex items-center gap-1"
@@ -113,8 +127,23 @@ export const CheckpointsWidget: React.FC<CheckpointsWidgetProps> = ({
               </div>
             </div>
 
-            {/* Complete status button */}
-            <div className="flex items-center gap-1.5 flex-shrink-0">
+            {/* Actions: Delete & Toggle */}
+            <div className="flex items-center gap-1 flex-shrink-0">
+              {onDeleteCheckpoint && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (confirm(`Удалить цель «${cp.title}»?`)) {
+                      onDeleteCheckpoint(cp.id);
+                    }
+                  }}
+                  className="p-1 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                  title="Удалить цель"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              )}
               <button
                 type="button"
                 onClick={(e) => handleToggle(e, cp)}
@@ -142,6 +171,15 @@ export const CheckpointsWidget: React.FC<CheckpointsWidgetProps> = ({
             </div>
           </div>
         ))}
+
+        {checkpoints.length === 0 && (
+          <div className="p-4 rounded-2xl bg-white/[0.02] border border-dashed border-white/[0.08] text-center space-y-1.5">
+            <p className="text-xs text-slate-300 font-semibold">Список целей пуст</p>
+            <p className="text-[10px] text-slate-500">
+              Нажми «+ Этап» выше, чтобы добавить свои реальные чекпоинты и цели!
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

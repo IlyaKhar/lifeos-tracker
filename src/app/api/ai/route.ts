@@ -62,27 +62,35 @@ export async function POST(req: Request) {
     const { prompt, userContext, apiKey } = await req.json();
     const rawKey = (apiKey || process.env.GEMINI_API_KEY || "").trim().replace(/^["']|["']$/g, "");
 
-    const systemInstruction = `Ты — Алина, умный, поддерживающий и практичный AI-коуч в приложении LifeOS. Пользователя зовут Илья. Отвечай кратко, по делу, дружелюбно и практично на русском языке. При необходимости давай конкретные цифры и шаги.`;
+    const systemInstruction = `Ты — Алина, умный, поддерживающий и практичный AI-коуч в приложении LifeOS. Пользователя зовут Илья. Отвечай емко, по делу, дружелюбно, уверенно и практично на русском языке. Всегда давай полезные цифры, конкретные шаги и поддерживай мотивацию.`;
 
     // 1. If key is provided and looks like Gemini (starts with AQ. or AIza)
     if (rawKey && (rawKey.startsWith("AQ.") || rawKey.startsWith("AIza"))) {
-      try {
-        const ai = new GoogleGenAI({ apiKey: rawKey });
-        // Try gemini-1.5-flash or gemini-2.0-flash
-        const response = await ai.models.generateContent({
-          model: "gemini-1.5-flash",
-          contents: `${systemInstruction}\n\nВопрос Ильи: ${prompt}`,
-        });
+      let lastError = "";
 
-        if (response?.text) {
-          return NextResponse.json({ reply: response.text });
+      // Try official SDK with gemini-2.0-flash, then gemini-1.5-flash
+      for (const model of ["gemini-2.0-flash", "gemini-1.5-flash"]) {
+        try {
+          const ai = new GoogleGenAI({ apiKey: rawKey });
+          const response = await ai.models.generateContent({
+            model,
+            contents: `${systemInstruction}\n\nВопрос Ильи: ${prompt}`,
+          });
+
+          if (response?.text) {
+            return NextResponse.json({ reply: response.text });
+          }
+        } catch (geminiErr: any) {
+          lastError = geminiErr?.message || String(geminiErr);
+          console.error(`Gemini SDK error (${model}):`, geminiErr);
         }
-      } catch (geminiErr: any) {
-        console.error("Gemini SDK error:", geminiErr);
-        // Fallback to direct fetch with x-goog-api-key
+      }
+
+      // Try direct REST fetch with x-goog-api-key header (vital for newer AQ. keys)
+      for (const model of ["gemini-2.0-flash", "gemini-1.5-flash"]) {
         try {
           const directRes = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(rawKey)}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
             {
               method: "POST",
               headers: {
@@ -106,14 +114,35 @@ export async function POST(req: Request) {
             if (text) {
               return NextResponse.json({ reply: text });
             }
+          } else {
+            const errJson = await directRes.json().catch(() => ({}));
+            lastError = errJson?.error?.message || `HTTP ${directRes.status}`;
           }
-        } catch (e) {
-          // ignore
+        } catch (e: any) {
+          lastError = e?.message || String(e);
         }
       }
+
+      // DO NOT silently swallow! User inserted their key and expects honest feedback
+      let diagnosticReply = `⚠️ Google API отклонил этот ключ Gemini:\n"${lastError}"\n\n`;
+      if (
+        lastError.includes("ACCESS_TOKEN_TYPE_UNSUPPORTED") ||
+        lastError.includes("API key not valid") ||
+        lastError.includes("UNAUTHENTICATED")
+      ) {
+        diagnosticReply += `💡 **Почему это произошло:**\nКлючи нового формата Google AI Studio (начинаются на AQ.) привязаны к проекту Google Cloud. В консоли Cloud нужно:\n1. Зайти в APIs & Services -> Library и включить **"Generative Language API"** (именно его, а не "Gemini API").\n2. Либо снять ограничения по API в настройках ключа.\n\n⚡ **Или решение за 10 секунд (рекомендую):**\nПодключи бесплатный ключ **Groq** (начни с \`gsk_\` на console.groq.com/keys) — он создается в 1 клик через Google, без Google Cloud, без карт и выдает умнейшую модель Llama 3.3 70B со скоростью 0.3 сек!`;
+      } else if (lastError.includes("SERVICE_DISABLED") || lastError.includes("has not been used")) {
+        diagnosticReply += `💡 В твоем Google Cloud проекте отключен **Generative Language API**.\nВключи его в Google Cloud Console или используй бесплатный ключ Groq (\`gsk_...\`).`;
+      } else if (lastError.includes("location") || lastError.includes("country")) {
+        diagnosticReply += `💡 Google блокирует прямые запросы к Gemini из твоего региона.\nИспользуй ключ Groq (\`gsk_...\`) — в нем нет региональных ограничений!`;
+      } else {
+        diagnosticReply += `💡 Проверь правильность ключа или переключись на бесплатный ключ Groq (\`gsk_...\`) на console.groq.com.`;
+      }
+
+      return NextResponse.json({ reply: diagnosticReply });
     }
 
-    // 2. If key is OpenAI / Groq / OpenRouter (sk-... or gsk_...)
+    // 2. If key is Groq / OpenRouter / OpenAI (gsk_... or sk-or-... or sk-...)
     if (rawKey && (rawKey.startsWith("sk-") || rawKey.startsWith("gsk_"))) {
       try {
         const isGroq = rawKey.startsWith("gsk_");
@@ -127,7 +156,7 @@ export async function POST(req: Request) {
         const model = isGroq
           ? "llama-3.3-70b-versatile"
           : isOpenRouter
-          ? "meta-llama/llama-3.3-70b-instruct:free"
+          ? "google/gemini-2.0-flash-exp:free"
           : "gpt-4o-mini";
 
         const oaiRes = await fetch(endpoint, {
@@ -151,30 +180,20 @@ export async function POST(req: Request) {
           if (reply) {
             return NextResponse.json({ reply });
           }
+        } else {
+          const errData = await oaiRes.json().catch(() => ({}));
+          return NextResponse.json({
+            reply: `⚠️ Ошибка провайдера ${isGroq ? "Groq" : "OpenRouter"}: ${errData?.error?.message || oaiRes.statusText}`,
+          });
         }
-      } catch (e) {
-        // Continue
+      } catch (e: any) {
+        return NextResponse.json({
+          reply: `⚠️ Ошибка соединения с ИИ: ${e?.message}`,
+        });
       }
     }
 
-    // 3. Live AI Fallback (Zero-config, real AI generation)
-    try {
-      const livePrompt = `${systemInstruction}\n\nВопрос Ильи: ${prompt}`;
-      const liveRes = await fetch(`https://text.pollinations.ai/${encodeURIComponent(livePrompt)}`, {
-        signal: AbortSignal.timeout(6000),
-      });
-
-      if (liveRes.ok) {
-        const liveText = await liveRes.text();
-        if (liveText && !liveText.includes("Free limit reached") && liveText.length > 5) {
-          return NextResponse.json({ reply: liveText });
-        }
-      }
-    } catch (e) {
-      // Continue to static failsafe
-    }
-
-    // 4. Built-in knowledge engine (always works)
+    // 3. Fallback knowledge engine (when no API key is specified)
     const reply = getSmartFallbackResponse(prompt, userContext);
     return NextResponse.json({ reply });
   } catch (error: any) {

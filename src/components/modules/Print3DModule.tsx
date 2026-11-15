@@ -24,7 +24,6 @@ export const Print3DModule: React.FC = () => {
 
   // Spool form
   const [showAddSpool, setShowAddSpool] = useState(false);
-  const [newBrand, setNewBrand] = useState("");
   const [newMaterial, setNewMaterial] = useState<FilamentSpool["material"]>("PLA");
   const [newColor, setNewColor] = useState("");
   const [newColorHex, setNewColorHex] = useState("#38bdf8");
@@ -54,13 +53,12 @@ export const Print3DModule: React.FC = () => {
 
   // 1. Spool Actions
   const handleAddSpool = () => {
-    if (!newBrand.trim() || !newColor.trim()) return;
-    const totalG = parseInt(newWeight) || 1000;
+    const totalG = Math.max(50, parseInt(newWeight) || 1000);
     const spool: FilamentSpool = {
       id: "sp_" + Date.now(),
-      brand: newBrand.trim(),
+      brand: `${totalG} г`,
       material: newMaterial,
-      colorName: newColor.trim(),
+      colorName: newColor.trim() || "Основной",
       colorHex: newColorHex,
       totalWeightGrams: totalG,
       remainingWeightGrams: totalG,
@@ -73,7 +71,7 @@ export const Print3DModule: React.FC = () => {
     StorageService.saveSpools(updated);
     if (!selectedSpoolId) setSelectedSpoolId(spool.id);
     setShowAddSpool(false);
-    setNewBrand("");
+    setNewWeight("1000");
     setNewColor("");
   };
 
@@ -282,7 +280,7 @@ export const Print3DModule: React.FC = () => {
               >
                 {spools.map((s) => (
                   <option key={s.id} value={s.id}>
-                    {s.brand} {s.material} ({s.colorName}) — ост. {s.remainingWeightGrams} г
+                    {s.material} ({s.colorName}) • {s.totalWeightGrams} г — ост. {s.remainingWeightGrams} г
                   </option>
                 ))}
               </select>
@@ -368,7 +366,7 @@ export const Print3DModule: React.FC = () => {
                               style={{ backgroundColor: spool.colorHex }}
                               className="w-2 h-2 rounded-full inline-block"
                             />
-                            {spool.brand} {spool.material}
+                            {spool.material} ({spool.colorName})
                           </span>
                         )}
                         <span>• {item.date}</span>
@@ -455,11 +453,11 @@ export const Print3DModule: React.FC = () => {
             <div className="text-xs font-semibold text-white">Добавить катушку филамента</div>
             <div className="grid grid-cols-2 gap-2">
               <input
-                type="text"
-                placeholder="Бренд (Kingroon, eSUN)"
-                value={newBrand}
-                onChange={(e) => setNewBrand(e.target.value)}
-                className="bg-black/30 border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs text-white"
+                type="number"
+                placeholder="Вес катушки, г (напр. 1000)"
+                value={newWeight}
+                onChange={(e) => setNewWeight(e.target.value)}
+                className="bg-black/30 border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs text-white font-mono"
               />
               <select
                 value={newMaterial}
@@ -475,7 +473,7 @@ export const Print3DModule: React.FC = () => {
             <div className="grid grid-cols-2 gap-2">
               <input
                 type="text"
-                placeholder="Цвет (Black, Matte White)"
+                placeholder="Цвет (Черный, Белый, Серый...)"
                 value={newColor}
                 onChange={(e) => setNewColor(e.target.value)}
                 className="bg-black/30 border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs text-white"
@@ -513,8 +511,10 @@ export const Print3DModule: React.FC = () => {
                     className="w-3.5 h-3.5 rounded-full border border-white/20 shadow-sm flex-shrink-0"
                   />
                   <div>
-                    <div className="text-xs font-semibold text-white">
-                      {sp.brand} <span className="text-orange-400 font-bold">{sp.material}</span> ({sp.colorName})
+                    <div className="text-xs font-semibold text-white flex items-center gap-1.5">
+                      <span className="text-orange-400 font-bold">{sp.material}</span>
+                      <span>({sp.colorName})</span>
+                      <span className="text-slate-400 font-mono text-[11px]">• {sp.totalWeightGrams} г</span>
                     </div>
                     <div className="text-[10px] text-slate-400 flex items-center gap-2 mt-0.5 font-mono">
                       <span className="flex items-center gap-0.5">
