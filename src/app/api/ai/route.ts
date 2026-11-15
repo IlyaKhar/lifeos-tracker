@@ -66,35 +66,59 @@ export async function POST(req: Request) {
   try {
     const { prompt, userContext, apiKey } = await req.json();
 
-    const geminiKey = apiKey || process.env.GEMINI_API_KEY;
+    const rawKey = (apiKey || process.env.GEMINI_API_KEY || "").trim().replace(/^["']|["']$/g, "");
 
     // If Gemini API key is provided, query Google Gemini Live!
-    if (geminiKey) {
-      const systemInstruction = `Ты — Алина, умный, поддерживающий и практичный AI-коуч в приложении LifeOS. Пользователя зовут Илья. Отвечай кратко, без лишней воды, дружелюбно и по делу на русском языке. При необходимости давай конкретные цифры и шаги.`;
+    if (rawKey) {
+      const systemInstruction = `Ты — Алина, умный, поддерживающий и практичный AI-коуч в приложении LifeOS. Пользователя зовут Илья. Отвечай кратко, без лишней воды, дружелюбно и по делу на русском языке. При необходимости давай конкретные цифры и шаги. Контекст: ${JSON.stringify(userContext || {})}`;
       
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [
-              {
-                role: "user",
-                parts: [{ text: `${systemInstruction}\n\nКонтекст пользователя: ${JSON.stringify(userContext || {})}\n\nВопрос Ильи: ${prompt}` }],
-              },
-            ],
-          }),
-        }
-      );
+      const modelsToTry = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro"];
+      let lastError = "";
 
-      if (res.ok) {
-        const data = await res.json();
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (text) {
-          return NextResponse.json({ reply: text });
+      for (const model of modelsToTry) {
+        try {
+          const res = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(rawKey)}`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "x-goog-api-key": rawKey,
+              },
+              body: JSON.stringify({
+                contents: [
+                  {
+                    role: "user",
+                    parts: [{ text: `${systemInstruction}\n\nВопрос Ильи: ${prompt}` }],
+                  },
+                ],
+              }),
+            }
+          );
+
+          if (res.ok) {
+            const data = await res.json();
+            const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (text) {
+              return NextResponse.json({ reply: text });
+            }
+          } else {
+            const errJson = await res.json().catch(() => null);
+            lastError = errJson?.error?.message || `HTTP ${res.status}`;
+            console.error(`Gemini model ${model} failed:`, res.status, lastError);
+            if (res.status === 401 || res.status === 403) {
+              break;
+            }
+          }
+        } catch (fetchErr: any) {
+          lastError = fetchErr?.message || "Network error";
         }
       }
+
+      // If key had error, return clear guidance
+      return NextResponse.json({
+        reply: `⚠️ Ошибка проверки ключа Gemini: ${lastError}.\n\nТвой ключ начинается на AQ. — это новый формат ключей Google (Authorization Keys). Если видишь ошибку ACCESS_TOKEN_TYPE_UNSUPPORTED, то при создании ключа в Google AI Studio выбери «Create API key in NEW project» (в новом проекте без ограничений), либо в Google Cloud включи «Generative Language API».`,
+      });
     }
 
     // Fallback to our high-quality built-in knowledge engine!
@@ -102,7 +126,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ reply });
   } catch (error: any) {
     return NextResponse.json(
-      { reply: "Извини, произошла ошибка соединения. Но я всегда готова помочь с тренировками и целями!" },
+      { reply: "Извини, произошла ошибка соединения. Попробуй еще раз!" },
       { status: 200 }
     );
   }
