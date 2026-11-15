@@ -86,8 +86,9 @@ export async function POST(req: Request) {
         }
       }
 
-      // Try direct REST fetch with x-goog-api-key header (vital for newer AQ. keys)
+      // Try direct REST fetch with multiple header styles (x-goog-api-key, ?key=, Bearer)
       for (const model of ["gemini-2.0-flash", "gemini-1.5-flash"]) {
+        // Method A: x-goog-api-key header
         try {
           const directRes = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
@@ -120,6 +121,67 @@ export async function POST(req: Request) {
           }
         } catch (e: any) {
           lastError = e?.message || String(e);
+        }
+
+        // Method B: query parameter ?key=
+        try {
+          const queryRes = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(rawKey)}`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contents: [
+                  {
+                    role: "user",
+                    parts: [{ text: `${systemInstruction}\n\nВопрос Ильи: ${prompt}` }],
+                  },
+                ],
+              }),
+            }
+          );
+
+          if (queryRes.ok) {
+            const data = await queryRes.json();
+            const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (text) {
+              return NextResponse.json({ reply: text });
+            }
+          }
+        } catch (e: any) {
+          // ignore
+        }
+
+        // Method C: Bearer authorization
+        try {
+          const bearerRes = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${rawKey}`,
+              },
+              body: JSON.stringify({
+                contents: [
+                  {
+                    role: "user",
+                    parts: [{ text: `${systemInstruction}\n\nВопрос Ильи: ${prompt}` }],
+                  },
+                ],
+              }),
+            }
+          );
+
+          if (bearerRes.ok) {
+            const data = await bearerRes.json();
+            const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (text) {
+              return NextResponse.json({ reply: text });
+            }
+          }
+        } catch (e: any) {
+          // ignore
         }
       }
 

@@ -25,6 +25,8 @@ export const AICoachModal: React.FC<AICoachModalProps> = ({ isOpen, onClose, use
   const [loading, setLoading] = useState(false);
   const [apiKey, setApiKey] = useState("");
   const [showKeyInput, setShowKeyInput] = useState(false);
+  const [isTestingKey, setIsTestingKey] = useState(false);
+  const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -37,6 +39,40 @@ export const AICoachModal: React.FC<AICoachModalProps> = ({ isOpen, onClose, use
     setApiKey(key);
     if (typeof window !== "undefined") {
       localStorage.setItem("lifeos_gemini_key", key);
+    }
+  };
+
+  const handleTestKey = async () => {
+    if (!apiKey.trim() || isTestingKey) return;
+    setIsTestingKey(true);
+    setTestResult(null);
+
+    try {
+      const res = await fetch("/api/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: "Проверка связи. Ответь ровно 3 слова: Я живая Алина!",
+          apiKey: apiKey.trim(),
+        }),
+      });
+
+      const data = await res.json();
+      const reply = data.reply || "";
+
+      if (reply.startsWith("⚠️") || reply.includes("отклонил") || reply.includes("Ошибка")) {
+        setTestResult({ success: false, message: reply });
+      } else {
+        setTestResult({ success: true, message: reply });
+        if (typeof window !== "undefined") {
+          const confetti = (await import("canvas-confetti")).default;
+          confetti({ particleCount: 45, spread: 65, origin: { y: 0.5 } });
+        }
+      }
+    } catch (e: any) {
+      setTestResult({ success: false, message: e?.message || "Ошибка соединения с сервером" });
+    } finally {
+      setIsTestingKey(false);
     }
   };
 
@@ -163,13 +199,52 @@ export const AICoachModal: React.FC<AICoachModalProps> = ({ isOpen, onClose, use
             <p className="text-[9px] text-slate-400 leading-relaxed">
               💡 <strong>Groq</strong> (ключ <code className="text-emerald-300">gsk_...</code>) — работает бесплатно, регистрация через Google в 1 клик, без Cloud-проектов и ограничений! Или вставь Gemini (<code className="text-sky-300">AQ.</code> / <code className="text-sky-300">AIza</code>).
             </p>
-            <input
-              type="text"
-              placeholder="Вставь ключ (gsk_... или AQ.... или AIzaSy...)"
-              value={apiKey}
-              onChange={(e) => handleSaveApiKey(e.target.value)}
-              className="w-full bg-black/40 border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-white font-mono"
-            />
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                placeholder="Вставь ключ (gsk_... или AQ.... или AIzaSy...)"
+                value={apiKey}
+                onChange={(e) => {
+                  handleSaveApiKey(e.target.value);
+                  setTestResult(null);
+                }}
+                className="flex-1 bg-black/40 border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-white font-mono"
+              />
+              <button
+                type="button"
+                onClick={handleTestKey}
+                disabled={isTestingKey || !apiKey.trim()}
+                className="px-3 py-1.5 rounded-xl bg-emerald-400 text-slate-950 font-bold text-xs active:scale-95 transition-all disabled:opacity-40 flex items-center gap-1 shadow-sm flex-shrink-0"
+              >
+                <Sparkles className="w-3 h-3" />
+                <span>{isTestingKey ? "Тест..." : "Тест"}</span>
+              </button>
+            </div>
+
+            {testResult && (
+              <div
+                className={`p-2.5 rounded-xl text-[11px] leading-relaxed border transition-all ${
+                  testResult.success
+                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
+                    : "bg-red-500/10 border-red-500/30 text-red-300"
+                }`}
+              >
+                {testResult.success ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">🎉</span>
+                    <div>
+                      <span className="font-bold">Ключ рабочий! Живой ИИ подключен:</span>
+                      <div className="text-slate-200 mt-0.5 font-medium italic">«{testResult.message}»</div>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="font-bold mb-1">❌ Проверка не прошла:</div>
+                    <div className="text-slate-300 whitespace-pre-wrap">{testResult.message}</div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 

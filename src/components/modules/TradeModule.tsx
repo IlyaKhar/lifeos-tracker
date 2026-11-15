@@ -631,3 +631,4 @@ export const TradeModule: React.FC = () => {
     </div>
   );
 };
+
