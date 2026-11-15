@@ -31,8 +31,8 @@ export const initialModules: ModuleItem[] = [
     icon: "wallet",
     accentColor: "amber",
     borderColor: "border-white/[0.06] hover:border-amber-500/40",
-    previewValue: "65 000 ₽",
-    previewSubtext: "Bambu Lab P1S (68%)",
+    previewValue: "0 ₽",
+    previewSubtext: "Пассат Б6 (0%)",
   },
   {
     id: "english",
@@ -42,8 +42,8 @@ export const initialModules: ModuleItem[] = [
     icon: "languages",
     accentColor: "sky",
     borderColor: "border-white/[0.06] hover:border-sky-500/40",
-    previewValue: "+20 слов",
-    previewSubtext: "Стрик 12 дней",
+    previewValue: "0 слов",
+    previewSubtext: "Словарь пуст",
   },
   {
     id: "reading",
@@ -53,8 +53,8 @@ export const initialModules: ModuleItem[] = [
     icon: "book-open",
     accentColor: "purple",
     borderColor: "border-white/[0.06] hover:border-purple-500/40",
-    previewValue: "142 / 320",
-    previewSubtext: "Чистый код (44%)",
+    previewValue: "0 книг",
+    previewSubtext: "Добавь книгу",
   },
   {
     id: "work",
@@ -188,52 +188,17 @@ export const initialPrintJobs: PrintJob[] = [
 
 export const initialSavingsGoals: SavingsGoal[] = [
   {
-    id: "sg1",
-    title: "3D-принтер Bambu Lab P1S",
-    icon: "layers",
-    targetAmount: 95000,
-    currentAmount: 65000,
+    id: "sg_main",
+    title: "Пассат Б6",
+    icon: "car",
+    targetAmount: 700000,
+    currentAmount: 0,
     currency: "₽",
     color: "amber",
   },
-  {
-    id: "sg2",
-    title: "Подушка безопасности (3 мес)",
-    icon: "wallet",
-    targetAmount: 150000,
-    currentAmount: 50000,
-    currency: "₽",
-    color: "emerald",
-  },
-  {
-    id: "sg3",
-    title: "Поездка в горы / Отпуск",
-    icon: "target",
-    targetAmount: 70000,
-    currentAmount: 22000,
-    currency: "₽",
-    color: "sky",
-  },
 ];
 
-export const initialBooks: Book[] = [
-  {
-    id: "b1",
-    title: "Чистый код",
-    author: "Роберт Мартин",
-    totalPages: 320,
-    currentPage: 142,
-    status: "reading",
-  },
-  {
-    id: "b2",
-    title: "Атомные привычки",
-    author: "Джеймс Клир",
-    totalPages: 300,
-    currentPage: 300,
-    status: "completed",
-  },
-];
+export const initialBooks: Book[] = [];
 
 export const initialHabits: DailyHabit[] = [
   { id: "h1", title: "Тренировка в зале", icon: "dumbbell", completed: true, streakDays: 4 },

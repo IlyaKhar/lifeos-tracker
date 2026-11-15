@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Flame, Plus } from "lucide-react";
+import { ArrowLeft, Flame, Plus, Sparkles } from "lucide-react";
 import { AppIcon } from "@/components/common/AppIcon";
 
 interface HeaderProps {
@@ -9,20 +9,20 @@ interface HeaderProps {
   activeModuleIcon?: string;
   userName?: string;
   onBack?: () => void;
-  onOpenQuickAction: () => void;
   onOpenAddModule: () => void;
   onOpenProfile?: () => void;
+  onOpenAI?: () => void;
   streakDays?: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   activeModuleTitle,
   activeModuleIcon,
-  userName = "Малой",
+  userName = "Илья",
   onBack,
-  onOpenQuickAction,
   onOpenAddModule,
   onOpenProfile,
+  onOpenAI,
   streakDays = 12,
 }) => {
   const [mounted, setMounted] = useState(false);
@@ -58,13 +58,16 @@ export const Header: React.FC<HeaderProps> = ({
               {activeModuleTitle}
             </span>
           </div>
-          <button
-            onClick={onOpenQuickAction}
-            className="w-8 h-8 rounded-full bg-white/[0.06] hover:bg-white/[0.1] text-white flex items-center justify-center font-bold active:scale-95 transition-all"
-            title="Быстрый ввод"
-          >
-            <Plus className="w-4 h-4" />
-          </button>
+          {onOpenAI && (
+            <button
+              onClick={onOpenAI}
+              className="px-2.5 py-1 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-semibold flex items-center gap-1 active:scale-95 transition-all"
+              title="AI Коуч"
+            >
+              <Sparkles className="w-3 h-3 text-emerald-400" />
+              <span>AI</span>
+            </button>
+          )}
         </div>
       ) : (
         <div className="flex items-center justify-between">
@@ -88,19 +91,22 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
+            {onOpenAI && (
+              <button
+                onClick={onOpenAI}
+                className="px-2.5 py-1.5 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 active:scale-95 transition-all text-xs font-semibold flex items-center gap-1"
+                title="AI Ассистент & Коуч"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>AI Коуч</span>
+              </button>
+            )}
             <button
               onClick={onOpenAddModule}
-              className="px-3 py-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.08] active:scale-95 transition-all text-xs font-semibold text-slate-200 flex items-center gap-1.5"
+              className="px-3 py-1.5 rounded-full bg-white text-slate-950 font-bold active:scale-95 transition-all text-xs flex items-center gap-1 shadow-sm"
             >
-              <Plus className="w-3.5 h-3.5 text-emerald-400" />
+              <Plus className="w-3.5 h-3.5" />
               <span>Сфера</span>
-            </button>
-            <button
-              onClick={onOpenQuickAction}
-              className="w-8 h-8 rounded-full bg-white text-slate-950 shadow-md flex items-center justify-center font-bold hover:scale-105 active:scale-95 transition-all"
-              title="Быстрый ввод"
-            >
-              <Plus className="w-4 h-4" />
             </button>
           </div>
         </div>

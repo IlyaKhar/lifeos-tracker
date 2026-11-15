@@ -1,24 +1,55 @@
 "use client";
 
-import React, { useState } from "react";
-import { Headphones, MessageSquare, BookOpen, Languages, Plus } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Languages, Plus, Trash2, CheckCircle2, BookOpen } from "lucide-react";
+import { StorageService, WordItem } from "@/lib/storage";
 import confetti from "canvas-confetti";
 
 export const EnglishModule: React.FC = () => {
-  const [totalWords, setTotalWords] = useState(480);
-  const [minutesToday, setMinutesToday] = useState(25);
-  const targetMinutes = 40;
+  const [words, setWords] = useState<WordItem[]>([]);
+  const [minutesToday, setMinutesToday] = useState(0);
+  const [targetMinutes, setTargetMinutes] = useState(30);
 
-  const handleAddWords = (count: number) => {
-    setTotalWords((prev) => prev + count);
-    confetti({ particleCount: 25, spread: 45, origin: { y: 0.7 } });
+  // New Word Input
+  const [showAddWord, setShowAddWord] = useState(false);
+  const [newWord, setNewWord] = useState("");
+  const [newTranslation, setNewTranslation] = useState("");
+
+  useEffect(() => {
+    setWords(StorageService.getEnglishWords());
+    setMinutesToday(StorageService.getEnglishMinutes());
+  }, []);
+
+  const handleAddWord = () => {
+    if (!newWord.trim()) return;
+    const item: WordItem = {
+      id: "w_" + Date.now(),
+      word: newWord.trim(),
+      translation: newTranslation.trim(),
+      date: new Date().toISOString().split("T")[0],
+    };
+    const updated = [item, ...words];
+    setWords(updated);
+    StorageService.saveEnglishWords(updated);
+    setNewWord("");
+    setNewTranslation("");
+    setShowAddWord(false);
+    confetti({ particleCount: 25, spread: 45 });
+  };
+
+  const handleDeleteWord = (id: string) => {
+    const updated = words.filter((w) => w.id !== id);
+    setWords(updated);
+    StorageService.saveEnglishWords(updated);
   };
 
   const handleAddMinutes = (min: number) => {
-    setMinutesToday((prev) => prev + min);
+    const updated = minutesToday + min;
+    setMinutesToday(updated);
+    StorageService.saveEnglishMinutes(updated);
   };
 
-  const progressPercent = Math.min(100, Math.round((minutesToday / targetMinutes) * 100));
+  const progressPercent = Math.min(100, Math.round((minutesToday / Math.max(1, targetMinutes)) * 100));
 
   return (
     <div className="space-y-4 pb-12">
@@ -31,7 +62,7 @@ export const EnglishModule: React.FC = () => {
             </div>
             <div>
               <span className="text-[10px] uppercase font-bold text-sky-400 tracking-wider">
-                Ежедневная практика
+                Практика сегодня
               </span>
               <div className="text-xl font-mono font-bold text-white mt-0.5">
                 {minutesToday} <span className="text-xs font-normal text-slate-400">/ {targetMinutes} мин</span>
@@ -66,57 +97,83 @@ export const EnglishModule: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. Vocabulary Bank Card */}
+      {/* 2. Custom Words Dictionary */}
       <div className="apple-card p-4 rounded-3xl space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <h4 className="text-xs font-bold text-white tracking-tight">Словарный запас</h4>
-            <span className="text-[10px] text-slate-400">Активно изученные слова</span>
+            <h4 className="text-xs font-bold text-white tracking-tight">Мой словарь слов</h4>
+            <span className="text-[10px] text-slate-400">{words.length} выученных слов</span>
           </div>
-          <span className="text-sm font-mono font-bold text-sky-400">{totalWords} слов</span>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2">
           <button
-            onClick={() => handleAddWords(5)}
-            className="py-2.5 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] text-xs font-semibold text-slate-200 active:scale-95 transition-all text-center"
+            onClick={() => setShowAddWord(!showAddWord)}
+            className="px-3 py-1 rounded-full bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 text-xs font-semibold flex items-center gap-1"
           >
-            +5 слов (Quizlet)
-          </button>
-          <button
-            onClick={() => handleAddWords(15)}
-            className="py-2.5 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] text-xs font-semibold text-slate-200 active:scale-95 transition-all text-center"
-          >
-            +15 слов (Урок)
+            <Plus className="w-3 h-3" />
+            <span>Слово</span>
           </button>
         </div>
-      </div>
 
-      {/* 3. Skill Areas */}
-      <div className="space-y-2">
-        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-1">
-          Фокус по навыкам
-        </span>
-        <div className="grid grid-cols-2 gap-2 text-xs">
-          <div className="p-3 rounded-2xl apple-card flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center">
-              <Headphones className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="font-semibold text-white">Listening</div>
-              <div className="text-[10px] text-slate-400">Подкасты 20м</div>
+        {/* Add Word Input */}
+        {showAddWord && (
+          <div className="p-3 rounded-2xl bg-[#1b1f2a] space-y-2">
+            <input
+              type="text"
+              placeholder="Слово на английском (e.g. Relentless)"
+              value={newWord}
+              onChange={(e) => setNewWord(e.target.value)}
+              className="w-full bg-black/30 border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs text-white"
+              autoFocus
+            />
+            <input
+              type="text"
+              placeholder="Перевод на русский (e.g. Неумолимый, упорный)"
+              value={newTranslation}
+              onChange={(e) => setNewTranslation(e.target.value)}
+              className="w-full bg-black/30 border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs text-white"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={handleAddWord}
+                className="flex-1 py-1.5 bg-sky-400 text-slate-950 font-bold rounded-xl text-xs"
+              >
+                Сохранить слово
+              </button>
+              <button
+                onClick={() => setShowAddWord(false)}
+                className="px-3 py-1.5 bg-white/[0.05] text-slate-400 rounded-xl text-xs"
+              >
+                Отмена
+              </button>
             </div>
           </div>
-          <div className="p-3 rounded-2xl apple-card flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-              <MessageSquare className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="font-semibold text-white">Speaking</div>
-              <div className="text-[10px] text-slate-400">Разговор 10м</div>
-            </div>
+        )}
+
+        {/* Words List */}
+        {words.length > 0 ? (
+          <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+            {words.map((w) => (
+              <div
+                key={w.id}
+                className="p-2.5 rounded-2xl bg-[#1b1f2a] flex items-center justify-between"
+              >
+                <div>
+                  <div className="text-xs font-bold text-white">{w.word}</div>
+                  <div className="text-[10px] text-slate-400">{w.translation || "Без перевода"}</div>
+                </div>
+                <button
+                  onClick={() => handleDeleteWord(w.id)}
+                  className="p-1 rounded-full text-slate-500 hover:text-rose-400"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
           </div>
-        </div>
+        ) : (
+          <div className="py-6 text-center text-slate-500 text-xs">
+            Словарь пока пуст. Добавь свои первые слова!
+          </div>
+        )}
       </div>
     </div>
   );

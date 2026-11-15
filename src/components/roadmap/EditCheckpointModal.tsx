@@ -256,3 +256,4 @@ export const EditCheckpointModal: React.FC<EditCheckpointModalProps> = ({
     </div>
   );
 };
+
