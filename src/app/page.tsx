@@ -16,6 +16,7 @@ import { CustomModule } from "@/components/modules/CustomModule";
 import { QuickActionModal } from "@/components/modals/QuickActionModal";
 import { AddModuleModal } from "@/components/modals/AddModuleModal";
 import { OnboardingModal } from "@/components/onboarding/OnboardingModal";
+import { EditCheckpointModal } from "@/components/roadmap/EditCheckpointModal";
 
 export default function Home() {
   const [modules, setModules] = useState<ModuleItem[]>(initialModules);
@@ -29,6 +30,10 @@ export default function Home() {
   const [isAddModuleOpen, setIsAddModuleOpen] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
 
+  // Checkpoint Edit / Detail Modal
+  const [isEditCheckpointOpen, setIsEditCheckpointOpen] = useState(false);
+  const [selectedCheckpoint, setSelectedCheckpoint] = useState<Checkpoint | null>(null);
+
   useEffect(() => {
     const prof = StorageService.getProfile();
     setProfile(prof);
@@ -36,7 +41,6 @@ export default function Home() {
     setWaterMl(StorageService.getWater());
     setCheckpoints(StorageService.getCheckpoints());
 
-    // Show onboarding if first time
     if (!prof.isOnboarded) {
       setIsOnboardingOpen(true);
     }
@@ -92,6 +96,28 @@ export default function Home() {
     setCheckpoints(updated);
   };
 
+  const handleOpenEditCheckpoint = (cp: Checkpoint | null) => {
+    setSelectedCheckpoint(cp);
+    setIsEditCheckpointOpen(true);
+  };
+
+  const handleSaveCheckpoint = (cp: Checkpoint) => {
+    let updated: Checkpoint[];
+    if (checkpoints.some((x) => x.id === cp.id)) {
+      updated = StorageService.updateCheckpoint(cp);
+    } else {
+      updated = StorageService.addCheckpoint(cp);
+    }
+    setCheckpoints(updated);
+    setIsEditCheckpointOpen(false);
+  };
+
+  const handleDeleteCheckpoint = (id: string) => {
+    const updated = StorageService.deleteCheckpoint(id);
+    setCheckpoints(updated);
+    setIsEditCheckpointOpen(false);
+  };
+
   const handleCompleteOnboarding = (updatedProfile: UserProfile) => {
     StorageService.saveProfile(updatedProfile);
     setProfile(updatedProfile);
@@ -101,7 +127,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 max-w-lg mx-auto border-x border-white/5 relative shadow-2xl">
+    <div className="min-h-screen flex flex-col bg-[#0d0f14] max-w-lg mx-auto border-x border-white/[0.05] relative shadow-2xl">
       {/* Top App Header */}
       <Header
         activeModuleTitle={activeModule?.title}
@@ -125,6 +151,7 @@ export default function Home() {
             onOpenAddModule={() => setIsAddModuleOpen(true)}
             onToggleCheckpoint={handleToggleCheckpoint}
             onEditProfile={() => setIsOnboardingOpen(true)}
+            onOpenEditCheckpoint={handleOpenEditCheckpoint}
           />
         ) : (
           <div className="animate-in fade-in slide-in-from-bottom-2 duration-200">
@@ -138,6 +165,16 @@ export default function Home() {
           </div>
         )}
       </main>
+
+      {/* Edit / View Checkpoint Modal */}
+      <EditCheckpointModal
+        isOpen={isEditCheckpointOpen}
+        checkpoint={selectedCheckpoint}
+        onClose={() => setIsEditCheckpointOpen(false)}
+        onSave={handleSaveCheckpoint}
+        onDelete={handleDeleteCheckpoint}
+        onToggleComplete={handleToggleCheckpoint}
+      />
 
       {/* Onboarding / Profile Setup Survey */}
       <OnboardingModal

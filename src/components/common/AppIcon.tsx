@@ -109,3 +109,4 @@ export const AppIcon: React.FC<AppIconProps> = ({
 
   return <IconComponent className={className} size={size} strokeWidth={2.2} />;
 };
+

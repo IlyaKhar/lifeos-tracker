@@ -45,7 +45,7 @@ const defaultProfile: UserProfile = {
   focusCategories: ["gym", "3d", "savings", "reading", "english", "work"],
   savingsTargetName: "3D-принтер Bambu Lab P1S",
   savingsTargetAmount: 95000,
-  isOnboarded: false, // will show survey if false
+  isOnboarded: false,
   createdAt: new Date().toISOString(),
 };
 
@@ -73,11 +73,8 @@ export const StorageService = {
   getProfile: (): UserProfile => safeGet(STORAGE_KEYS.PROFILE, defaultProfile),
   saveProfile: (profile: UserProfile): void => {
     safeSet(STORAGE_KEYS.PROFILE, profile);
-    // Generate corresponding checkpoints
     const checkpoints = generateSmartCheckpoints(profile);
     safeSet(STORAGE_KEYS.CHECKPOINTS, checkpoints);
-
-    // Also update weight log starting point
     StorageService.addWeightLog(profile.currentWeight);
   },
 
@@ -87,9 +84,31 @@ export const StorageService = {
     return safeGet(STORAGE_KEYS.CHECKPOINTS, fallback);
   },
   saveCheckpoints: (cps: Checkpoint[]): void => safeSet(STORAGE_KEYS.CHECKPOINTS, cps),
+  
   toggleCheckpoint: (id: string): Checkpoint[] => {
     const current = StorageService.getCheckpoints();
     const updated = current.map((c) => (c.id === id ? { ...c, completed: !c.completed } : c));
+    StorageService.saveCheckpoints(updated);
+    return updated;
+  },
+
+  updateCheckpoint: (updatedCp: Checkpoint): Checkpoint[] => {
+    const current = StorageService.getCheckpoints();
+    const updated = current.map((c) => (c.id === updatedCp.id ? updatedCp : c));
+    StorageService.saveCheckpoints(updated);
+    return updated;
+  },
+
+  addCheckpoint: (newCp: Checkpoint): Checkpoint[] => {
+    const current = StorageService.getCheckpoints();
+    const updated = [newCp, ...current];
+    StorageService.saveCheckpoints(updated);
+    return updated;
+  },
+
+  deleteCheckpoint: (id: string): Checkpoint[] => {
+    const current = StorageService.getCheckpoints();
+    const updated = current.filter((c) => c.id !== id);
     StorageService.saveCheckpoints(updated);
     return updated;
   },
@@ -108,7 +127,6 @@ export const StorageService = {
     ].sort((a, b) => a.date.localeCompare(b.date));
     StorageService.saveWeightLogs(updated);
 
-    // Also update module preview
     const modules = StorageService.getModules();
     const gymIdx = modules.findIndex((m) => m.id === "gym");
     if (gymIdx !== -1) {
@@ -138,7 +156,6 @@ export const StorageService = {
     });
     StorageService.saveSavingsGoals(goals);
 
-    // Update preview
     const modules = StorageService.getModules();
     const savIdx = modules.findIndex((m) => m.id === "savings");
     if (savIdx !== -1) {
