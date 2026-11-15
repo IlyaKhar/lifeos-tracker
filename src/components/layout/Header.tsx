@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { ArrowLeft, Flame, Plus } from "lucide-react";
 
 interface HeaderProps {
@@ -18,11 +18,19 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenAddModule,
   streakDays = 12,
 }) => {
-  const todayFormatted = new Intl.DateTimeFormat("ru-RU", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  }).format(new Date());
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const todayFormatted = mounted
+    ? new Intl.DateTimeFormat("ru-RU", {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+      }).format(new Date())
+    : "Сегодня";
 
   return (
     <header className="sticky top-0 z-40 px-4 pt-4 pb-3 glass-panel border-b border-white/10">
@@ -84,4 +92,3 @@ export const Header: React.FC<HeaderProps> = ({
     </header>
   );
 };
-

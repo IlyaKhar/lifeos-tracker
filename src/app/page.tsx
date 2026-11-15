@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { ModuleItem } from "@/types";
+import { initialModules } from "@/lib/initialData";
 import { StorageService } from "@/lib/storage";
 import { Header } from "@/components/layout/Header";
 import { BentoGrid } from "@/components/bento/BentoGrid";
@@ -16,15 +17,17 @@ import { QuickActionModal } from "@/components/modals/QuickActionModal";
 import { AddModuleModal } from "@/components/modals/AddModuleModal";
 
 export default function Home() {
-  const [modules, setModules] = useState<ModuleItem[]>([]);
+  const [modules, setModules] = useState<ModuleItem[]>(initialModules);
   const [activeModule, setActiveModule] = useState<ModuleItem | null>(null);
   const [waterMl, setWaterMl] = useState(1750);
   const [isQuickActionOpen, setIsQuickActionOpen] = useState(false);
   const [isAddModuleOpen, setIsAddModuleOpen] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     setModules(StorageService.getModules());
     setWaterMl(StorageService.getWater());
+    setIsLoaded(true);
   }, []);
 
   const handleAddWater = (deltaMl: number) => {
@@ -82,7 +85,7 @@ export default function Home() {
         onOpenAddModule={() => setIsAddModuleOpen(true)}
       />
 
-      {/* Main Content Area with Smooth Transitions */}
+      {/* Main Content Area */}
       <main className="flex-1 p-4 pb-20 overflow-y-auto">
         {!activeModule ? (
           <BentoGrid
@@ -123,4 +126,3 @@ export default function Home() {
     </div>
   );
 }
-
