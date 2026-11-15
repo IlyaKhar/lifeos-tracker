@@ -81,48 +81,88 @@ export const BentoGrid: React.FC<BentoGridProps> = ({
         <span className="text-[11px] text-slate-500">Нажми для перехода</span>
       </div>
 
-      {/* 4. Bento Grid (Apple Matte Style) */}
+      {/* 4. Bento Grid (Fixed Layout - No squished pills, Symmetrical Grid) */}
       <div className="grid grid-cols-2 gap-3">
-        {modules.map((mod) => {
+        {modules.map((mod, index) => {
+          // Gym is always full width; if last item is odd, make it full width too for perfect symmetry!
           const isGym = mod.category === "gym";
+          const isLastOdd = index === modules.length - 1 && (modules.length - 1) % 2 !== 0;
+          const isFullWidth = isGym || isLastOdd;
+
           const color = COLOR_CONFIGS[mod.accentColor] || COLOR_CONFIGS.emerald;
 
-          return (
-            <div
-              key={mod.id}
-              onClick={() => onSelectModule(mod)}
-              className={`p-4 rounded-3xl apple-card hover:bg-[#1a1e2a] transition-all cursor-pointer active:scale-[0.98] group flex flex-col justify-between ${
-                isGym ? "col-span-2 min-h-[135px]" : "min-h-[135px]"
-              }`}
-            >
-              <div>
+          if (isFullWidth) {
+            return (
+              <div
+                key={mod.id}
+                onClick={() => onSelectModule(mod)}
+                className="col-span-2 p-4 rounded-3xl apple-card hover:bg-[#1a1e2a] transition-all cursor-pointer active:scale-[0.98] group flex flex-col justify-between min-h-[120px]"
+              >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <div className={`w-9 h-9 rounded-2xl ${color.bg} ${color.text} flex items-center justify-center`}>
-                      <AppIcon name={mod.icon || mod.category} className="w-4 h-4" />
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-2xl ${color.bg} ${color.text} flex items-center justify-center flex-shrink-0`}>
+                      <AppIcon name={mod.icon || mod.category} className="w-5 h-5" />
                     </div>
                     <div>
                       <h3 className="font-bold text-sm text-white group-hover:text-emerald-400 transition-colors tracking-tight">
                         {mod.title}
                       </h3>
-                      <p className="text-[10px] text-slate-400 line-clamp-1">
+                      <p className="text-[11px] text-slate-400 line-clamp-1 mt-0.5">
                         {mod.subtitle}
                       </p>
                     </div>
                   </div>
-                  <span className="text-xs font-mono font-bold text-slate-200 bg-white/[0.04] px-2 py-1 rounded-xl">
+                  <span className="text-xs font-mono font-bold text-slate-200 bg-white/[0.05] px-2.5 py-1 rounded-full whitespace-nowrap flex-shrink-0">
                     {mod.previewValue}
                   </span>
                 </div>
+
+                <div className="pt-2.5 mt-2 border-t border-white/[0.04] flex items-center justify-between text-xs text-slate-400">
+                  <span className="text-[11px] font-medium text-slate-300 truncate pr-2">
+                    {mod.previewSubtext}
+                  </span>
+                  <span className="w-6 h-6 rounded-full bg-white/[0.04] flex items-center justify-center text-slate-400 group-hover:text-white group-hover:bg-white/[0.08] group-hover:translate-x-0.5 transition-all flex-shrink-0">
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </span>
+                </div>
+              </div>
+            );
+          }
+
+          // 2-Column Compact Card (Clean vertical hierarchy: Icon left + Pill right, Title below)
+          return (
+            <div
+              key={mod.id}
+              onClick={() => onSelectModule(mod)}
+              className="p-3.5 rounded-3xl apple-card hover:bg-[#1a1e2a] transition-all cursor-pointer active:scale-[0.98] group flex flex-col justify-between min-h-[145px]"
+            >
+              {/* Top Row: Icon + Value Badge on single line, never colliding */}
+              <div className="flex items-center justify-between w-full">
+                <div className={`w-8 h-8 rounded-2xl ${color.bg} ${color.text} flex items-center justify-center flex-shrink-0`}>
+                  <AppIcon name={mod.icon || mod.category} className="w-4 h-4" />
+                </div>
+                <span className="text-[11px] font-mono font-bold text-slate-200 bg-white/[0.05] px-2 py-0.5 rounded-full whitespace-nowrap flex-shrink-0">
+                  {mod.previewValue}
+                </span>
               </div>
 
-              {/* Card Footer */}
-              <div className="pt-3 mt-2 border-t border-white/[0.04] flex items-center justify-between text-xs text-slate-400">
-                <span className="text-[11px] font-medium text-slate-300 truncate pr-2">
+              {/* Middle Area: Title & Subtitle with full width */}
+              <div className="my-1.5">
+                <h3 className="font-bold text-sm text-white group-hover:text-emerald-400 transition-colors tracking-tight leading-snug">
+                  {mod.title}
+                </h3>
+                <p className="text-[10px] text-slate-400 line-clamp-1 mt-0.5">
+                  {mod.subtitle}
+                </p>
+              </div>
+
+              {/* Bottom Footer */}
+              <div className="pt-2 border-t border-white/[0.04] flex items-center justify-between text-xs text-slate-400">
+                <span className="text-[10px] font-medium text-slate-300 truncate pr-1">
                   {mod.previewSubtext}
                 </span>
-                <span className="w-6 h-6 rounded-full bg-white/[0.04] flex items-center justify-center text-slate-400 group-hover:text-white group-hover:bg-white/[0.08] group-hover:translate-x-0.5 transition-all">
-                  <ArrowRight className="w-3.5 h-3.5" />
+                <span className="w-5 h-5 rounded-full bg-white/[0.04] flex items-center justify-center text-slate-400 group-hover:text-white group-hover:bg-white/[0.08] transition-all flex-shrink-0">
+                  <ArrowRight className="w-3 h-3" />
                 </span>
               </div>
             </div>
