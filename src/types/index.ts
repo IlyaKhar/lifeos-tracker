@@ -91,6 +91,21 @@ export interface FilamentSpool {
   priceRub?: number;
 }
 
+export type PrintModelType = 'for_myself' | 'custom_order';
+export type PrintModelStatus = 'in_progress' | 'completed' | 'paid';
+
+export interface PrintModelItem {
+  id: string;
+  title: string;
+  modelType: PrintModelType; // 'for_myself' | 'custom_order'
+  priceRub: number; // сколько получу (0 если для себя)
+  weightGrams: number; // расход пластика в граммах
+  spoolId?: string; // какая катушка использовалась
+  status: PrintModelStatus; // 'in_progress' | 'completed' | 'paid'
+  date: string;
+  notes?: string;
+}
+
 export interface PrintJob {
   id: string;
   title: string;
@@ -124,6 +139,17 @@ export interface Book {
   currentPage: number;
   status: 'reading' | 'planned' | 'completed';
   coverUrl?: string;
+}
+
+// WORK & STUDY TASKS
+export interface WorkTask {
+  id: string;
+  title: string;
+  completed: boolean;
+  priority?: 'high' | 'normal';
+  dueDate?: string; // "Сегодня", "Завтра", "Пт, 20 Ноября" и т.д.
+  category?: 'study' | 'work' | 'general';
+  createdAt: string;
 }
 
 // ENGLISH
