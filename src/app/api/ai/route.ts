@@ -209,45 +209,69 @@ export async function POST(req: Request) {
       try {
         const isGroq = rawKey.startsWith("gsk_");
         const isOpenRouter = rawKey.startsWith("sk-or-");
+        const providerName = isGroq ? "Groq" : isOpenRouter ? "OpenRouter" : "OpenAI";
+
         const endpoint = isGroq
           ? "https://api.groq.com/openai/v1/chat/completions"
           : isOpenRouter
           ? "https://openrouter.ai/api/v1/chat/completions"
           : "https://api.openai.com/v1/chat/completions";
 
-        const model = isGroq
-          ? "llama-3.3-70b-versatile"
+        const candidateModels = isGroq
+          ? ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
           : isOpenRouter
-          ? "google/gemini-2.0-flash-exp:free"
-          : "gpt-4o-mini";
+          ? [
+              "meta-llama/llama-3.3-70b-instruct:free",
+              "google/gemini-2.0-flash-exp:free",
+              "deepseek/deepseek-chat:free",
+              "qwen/qwen-2.5-72b-instruct:free",
+            ]
+          : ["gpt-4o-mini", "gpt-3.5-turbo"];
 
-        const oaiRes = await fetch(endpoint, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${rawKey}`,
-          },
-          body: JSON.stringify({
-            model,
-            messages: [
-              { role: "system", content: systemInstruction },
-              { role: "user", content: prompt },
-            ],
-          }),
-        });
+        let lastOaiError = "";
 
-        if (oaiRes.ok) {
-          const oaiData = await oaiRes.json();
-          const reply = oaiData.choices?.[0]?.message?.content;
-          if (reply) {
-            return NextResponse.json({ reply });
+        for (const model of candidateModels) {
+          try {
+            const headers: Record<string, string> = {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${rawKey}`,
+            };
+
+            if (isOpenRouter) {
+              headers["HTTP-Referer"] = "https://lifeos-tracker-two.vercel.app";
+              headers["X-Title"] = "LifeOS Tracker";
+            }
+
+            const oaiRes = await fetch(endpoint, {
+              method: "POST",
+              headers,
+              body: JSON.stringify({
+                model,
+                messages: [
+                  { role: "system", content: systemInstruction },
+                  { role: "user", content: prompt },
+                ],
+              }),
+            });
+
+            if (oaiRes.ok) {
+              const oaiData = await oaiRes.json();
+              const reply = oaiData.choices?.[0]?.message?.content;
+              if (reply) {
+                return NextResponse.json({ reply });
+              }
+            } else {
+              const errData = await oaiRes.json().catch(() => ({}));
+              lastOaiError = errData?.error?.message || oaiRes.statusText;
+            }
+          } catch (modelErr: any) {
+            lastOaiError = modelErr?.message || String(modelErr);
           }
-        } else {
-          const errData = await oaiRes.json().catch(() => ({}));
-          return NextResponse.json({
-            reply: `⚠️ Ошибка провайдера ${isGroq ? "Groq" : "OpenRouter"}: ${errData?.error?.message || oaiRes.statusText}`,
-          });
         }
+
+        return NextResponse.json({
+          reply: `⚠️ Ошибка провайдера ${providerName}: ${lastOaiError}`,
+        });
       } catch (e: any) {
         return NextResponse.json({
           reply: `⚠️ Ошибка соединения с ИИ: ${e?.message}`,
