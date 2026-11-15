@@ -11,6 +11,8 @@ import {
   Checkpoint,
   PrintModelItem,
   WorkTask,
+  TradeProduct,
+  TradeSale,
 } from "@/types";
 import {
   initialModules,
@@ -40,6 +42,8 @@ const STORAGE_KEYS = {
   WATER_ML: "lifeos_water_ml_v1",
   ENGLISH_WORDS: "lifeos_english_words_v1",
   ENGLISH_MINUTES: "lifeos_english_min_v1",
+  TRADE_PRODUCTS: "lifeos_trade_products_v1",
+  TRADE_SALES: "lifeos_trade_sales_v1",
 };
 
 export interface WordItem {
@@ -149,11 +153,21 @@ export const StorageService = {
     const savedCustomModules = safeGet<ModuleItem[]>(STORAGE_KEYS.MODULES, initialModules)
       .filter((m) => m.category === "custom");
 
-    // 1. Gym
+    // 1. Gym (Weekly progress calculation)
     const weightLogs = StorageService.getWeightLogs();
     const currentWeight = weightLogs.length > 0 ? weightLogs[weightLogs.length - 1].weightKg : 78.4;
+    let weightTrend = "";
+    if (weightLogs.length >= 2) {
+      const prevLog = weightLogs[Math.max(0, weightLogs.length - 7)];
+      const diff = +(currentWeight - prevLog.weightKg).toFixed(1);
+      if (diff !== 0) {
+        weightTrend = ` (${diff > 0 ? `+${diff}` : diff} кг/нед)`;
+      }
+    }
     const workouts = StorageService.getWorkouts();
+    const workoutsCount = workouts.length;
     const lastWorkout = workouts.length > 0 ? workouts[0].name : "Прогрессия весов";
+    const gymPreviewSub = workoutsCount > 0 ? `${workoutsCount} трен. • ${lastWorkout}` : "Прогрессия весов";
 
     // 2. Savings
     const savingsGoals = StorageService.getSavingsGoals();
@@ -195,6 +209,17 @@ export const StorageService = {
       ? `${completedTasks} задач закрыто`
       : "Фокус-сессии дня";
 
+    // 7. Trade (Товарка & Бизнес)
+    const tradeProducts = StorageService.getTradeProducts();
+    const tradeSales = StorageService.getTradeSales();
+    const totalTradeProfit = tradeSales.reduce((sum, s) => sum + (s.profitRub || 0), 0);
+    const totalItemsInStock = tradeProducts.reduce((sum, p) => sum + (p.stockQuantity || 0), 0);
+    const tradeSubtext = tradeSales.length > 0
+      ? `${tradeSales.length} продаж • ${totalItemsInStock} шт на складе`
+      : totalItemsInStock > 0
+      ? `${totalItemsInStock} шт на складе`
+      : "Учет закупок и продаж";
+
     const standardModules: ModuleItem[] = [
       {
         id: "gym",
@@ -204,8 +229,19 @@ export const StorageService = {
         icon: "dumbbell",
         accentColor: "emerald",
         borderColor: "border-white/[0.06] hover:border-emerald-500/40",
-        previewValue: `${currentWeight} кг`,
-        previewSubtext: lastWorkout,
+        previewValue: `${currentWeight} кг${weightTrend}`,
+        previewSubtext: gymPreviewSub,
+      },
+      {
+        id: "trade",
+        title: "Товарка & Бизнес",
+        subtitle: "Склад, продажи и прибыль",
+        category: "trade",
+        icon: "package",
+        accentColor: "rose",
+        borderColor: "border-white/[0.06] hover:border-rose-500/40",
+        previewValue: totalTradeProfit > 0 ? `+${totalTradeProfit.toLocaleString("ru-RU")} ₽` : "0 ₽",
+        previewSubtext: tradeSubtext,
       },
       {
         id: "3d",
@@ -413,6 +449,64 @@ export const StorageService = {
     StorageService.saveEnglishWords([]);
     StorageService.saveWater(0);
     StorageService.saveWorkTasks([]);
+    StorageService.saveTradeProducts([]);
+    StorageService.saveTradeSales([]);
+  },
+
+  // Trade Products & Sales (Товарка & Бизнес)
+  getTradeProducts: (): TradeProduct[] => safeGet(STORAGE_KEYS.TRADE_PRODUCTS, []),
+  saveTradeProducts: (products: TradeProduct[]) => safeSet(STORAGE_KEYS.TRADE_PRODUCTS, products),
+  addTradeProduct: (product: TradeProduct): TradeProduct[] => {
+    const current = StorageService.getTradeProducts();
+    const updated = [product, ...current];
+    StorageService.saveTradeProducts(updated);
+    return updated;
+  },
+  deleteTradeProduct: (id: string): TradeProduct[] => {
+    const current = StorageService.getTradeProducts();
+    const updated = current.filter((p) => p.id !== id);
+    StorageService.saveTradeProducts(updated);
+    return updated;
+  },
+
+  getTradeSales: (): TradeSale[] => safeGet(STORAGE_KEYS.TRADE_SALES, []),
+  saveTradeSales: (sales: TradeSale[]) => safeSet(STORAGE_KEYS.TRADE_SALES, sales),
+  addTradeSale: (sale: TradeSale): { sales: TradeSale[]; products: TradeProduct[] } => {
+    const sales = [sale, ...StorageService.getTradeSales()];
+    StorageService.saveTradeSales(sales);
+
+    // Deduct quantity from product stock
+    const products = StorageService.getTradeProducts().map((p) => {
+      if (p.id === sale.productId) {
+        return {
+          ...p,
+          stockQuantity: Math.max(0, p.stockQuantity - sale.quantity),
+        };
+      }
+      return p;
+    });
+    StorageService.saveTradeProducts(products);
+
+    return { sales, products };
+  },
+  deleteTradeSale: (id: string): TradeSale[] => {
+    const current = StorageService.getTradeSales();
+    const target = current.find((s) => s.id === id);
+    const updated = current.filter((s) => s.id !== id);
+    StorageService.saveTradeSales(updated);
+
+    // Restore stock if sale was cancelled
+    if (target) {
+      const products = StorageService.getTradeProducts().map((p) => {
+        if (p.id === target.productId) {
+          return { ...p, stockQuantity: p.stockQuantity + target.quantity };
+        }
+        return p;
+      });
+      StorageService.saveTradeProducts(products);
+    }
+
+    return updated;
   },
 
   // Work & Study Tasks

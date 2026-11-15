@@ -27,6 +27,7 @@ const COLOR_CONFIGS: Record<string, { bg: string; text: string }> = {
   sky: { bg: "bg-sky-500/10", text: "text-sky-400" },
   purple: { bg: "bg-purple-500/10", text: "text-purple-400" },
   indigo: { bg: "bg-indigo-500/10", text: "text-indigo-400" },
+  rose: { bg: "bg-rose-500/10", text: "text-rose-400" },
 };
 
 export const BentoGrid: React.FC<BentoGridProps> = ({

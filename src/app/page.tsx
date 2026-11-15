@@ -12,6 +12,7 @@ import { SavingsModule } from "@/components/modules/SavingsModule";
 import { BooksModule } from "@/components/modules/BooksModule";
 import { EnglishModule } from "@/components/modules/EnglishModule";
 import { WorkModule } from "@/components/modules/WorkModule";
+import { TradeModule } from "@/components/modules/TradeModule";
 import { CustomModule } from "@/components/modules/CustomModule";
 import { AddModuleModal } from "@/components/modals/AddModuleModal";
 import { OnboardingModal } from "@/components/onboarding/OnboardingModal";
@@ -154,6 +155,7 @@ export default function Home() {
             {activeModule.category === "reading" && <BooksModule />}
             {activeModule.category === "english" && <EnglishModule />}
             {activeModule.category === "work" && <WorkModule />}
+            {activeModule.category === "trade" && <TradeModule />}
             {activeModule.category === "custom" && <CustomModule module={activeModule} />}
           </div>
         )}

@@ -11,10 +11,13 @@ import {
   Plus,
   Check,
   TrendingDown,
+  TrendingUp,
   RotateCcw,
   UtensilsCrossed,
   Trash2,
   Calendar,
+  Zap,
+  Flame,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 
@@ -263,6 +266,51 @@ export const GymModule: React.FC = () => {
   const startWeight = weightLogs.length > 0 ? weightLogs[0].weightKg : 79.2;
   const weightDelta = +(currentWeight - startWeight).toFixed(1);
 
+  // Weekly Analytics Computation (Вес, Тоннаж, Подходы, Рабочие веса)
+  const weekLogs = weightLogs.slice(-7);
+  const weekStartWeight = weekLogs.length > 0 ? weekLogs[0].weightKg : currentWeight;
+  const weeklyWeightDiff = +(currentWeight - weekStartWeight).toFixed(1);
+  const weeklyAvgWeight = weekLogs.length > 0
+    ? +(weekLogs.reduce((s, l) => s + l.weightKg, 0) / weekLogs.length).toFixed(1)
+    : currentWeight;
+
+  interface ExerciseMaxRecord {
+    name: string;
+    maxWeight: number;
+    bestReps: number;
+    totalCompletedSets: number;
+  }
+
+  const exerciseRecords: Record<string, ExerciseMaxRecord> = {};
+  let totalTonnage = 0;
+  let totalCompletedSets = 0;
+  let totalSetsCount = 0;
+
+  workouts.forEach((w) => {
+    w.exercises.forEach((ex) => {
+      ex.sets.forEach((s) => {
+        totalSetsCount++;
+        if (s.completed && s.weightKg > 0 && s.reps > 0) {
+          totalCompletedSets++;
+          totalTonnage += s.weightKg * s.reps;
+          const curr = exerciseRecords[ex.name];
+          if (!curr || s.weightKg > curr.maxWeight || (s.weightKg === curr.maxWeight && s.reps > curr.bestReps)) {
+            exerciseRecords[ex.name] = {
+              name: ex.name,
+              maxWeight: s.weightKg,
+              bestReps: s.reps,
+              totalCompletedSets: (curr?.totalCompletedSets || 0) + 1,
+            };
+          } else {
+            curr.totalCompletedSets += 1;
+          }
+        }
+      });
+    });
+  });
+
+  const topExercises = Object.values(exerciseRecords);
+
   const formatTimer = (sec: number) => {
     const m = Math.floor(sec / 60);
     const s = sec % 60;
@@ -402,7 +450,103 @@ export const GymModule: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. Workout Sessions (Full User Control) */}
+      {/* 2. Weekly Progress & Working Weights Analysis (Недельный срез) */}
+      <div className="apple-card p-4 rounded-3xl space-y-3.5 border border-emerald-500/20 bg-gradient-to-b from-[#16201b] to-[#12141a]">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+              <Zap className="w-4 h-4" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-white tracking-tight flex items-center gap-1.5">
+                <span>Прогресс недели (Аналитика)</span>
+                <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
+                  7 ДНЕЙ
+                </span>
+              </h4>
+              <p className="text-[10px] text-slate-400">Срез по весу тела, тоннажу и подходам</p>
+            </div>
+          </div>
+        </div>
+
+        {/* 3 Metric Pills */}
+        <div className="grid grid-cols-3 gap-2">
+          <div className="p-2.5 rounded-2xl bg-white/[0.03] border border-white/[0.04]">
+            <div className="text-[10px] text-slate-400">Вес за 7 дн.</div>
+            <div className="text-xs font-mono font-bold text-emerald-400 mt-0.5 flex items-center gap-1">
+              {weeklyWeightDiff > 0 ? (
+                <>
+                  <TrendingUp className="w-3 h-3 text-amber-400" />
+                  <span>+{weeklyWeightDiff} кг</span>
+                </>
+              ) : weeklyWeightDiff < 0 ? (
+                <>
+                  <TrendingDown className="w-3 h-3 text-emerald-400" />
+                  <span>{weeklyWeightDiff} кг</span>
+                </>
+              ) : (
+                <span>0.0 кг</span>
+              )}
+            </div>
+            <div className="text-[9px] text-slate-500 mt-0.5">ср: {weeklyAvgWeight} кг</div>
+          </div>
+
+          <div className="p-2.5 rounded-2xl bg-white/[0.03] border border-white/[0.04]">
+            <div className="text-[10px] text-slate-400">Тоннаж недели</div>
+            <div className="text-xs font-mono font-bold text-white mt-0.5">
+              {totalTonnage > 0 ? `${(totalTonnage / 1000).toFixed(1)} т` : "0.0 т"}
+            </div>
+            <div className="text-[9px] text-slate-500 mt-0.5 truncate">
+              {totalTonnage.toLocaleString("ru-RU")} кг
+            </div>
+          </div>
+
+          <div className="p-2.5 rounded-2xl bg-white/[0.03] border border-white/[0.04]">
+            <div className="text-[10px] text-slate-400">Подходы</div>
+            <div className="text-xs font-mono font-bold text-emerald-300 mt-0.5">
+              {totalCompletedSets} / {totalSetsCount}
+            </div>
+            <div className="text-[9px] text-slate-500 mt-0.5">
+              {totalSetsCount > 0 ? `${Math.round((totalCompletedSets / totalSetsCount) * 100)}% закрыто` : "0%"}
+            </div>
+          </div>
+        </div>
+
+        {/* Peak Working Weights (PRs) */}
+        <div className="space-y-1.5 pt-1 border-t border-white/[0.05]">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+            <Trophy className="w-3 h-3 text-amber-400" />
+            <span>Пиковые рабочие веса в упражнениях:</span>
+          </div>
+
+          {topExercises.length === 0 ? (
+            <div className="p-2.5 rounded-xl bg-black/20 text-[10px] text-slate-400 text-center">
+              Отмечай галочками выполненные подходы во время тренировки — здесь появится твой силовой прогресс и рекорды!
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-1.5">
+              {topExercises.slice(0, 4).map((rec, i) => (
+                <div
+                  key={i}
+                  className="p-2 px-3 rounded-xl bg-white/[0.03] flex items-center justify-between text-xs border border-white/[0.03]"
+                >
+                  <span className="font-semibold text-white truncate max-w-[60%]">{rec.name}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono font-bold text-emerald-400 text-xs">
+                      {rec.maxWeight} кг
+                    </span>
+                    <span className="text-[10px] font-mono text-slate-400">
+                      × {rec.bestReps} повт.
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 3. Workout Sessions (Full User Control) */}
       <div className="space-y-3">
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">

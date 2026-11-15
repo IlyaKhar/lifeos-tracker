@@ -21,6 +21,10 @@ import {
   Timer,
   Zap,
   Activity,
+  Package,
+  ShoppingBag,
+  Store,
+  TrendingUp,
   LucideIcon,
 } from "lucide-react";
 
@@ -72,6 +76,15 @@ const ICON_MAP: Record<string, LucideIcon> = {
   "💼": Briefcase,
   code: Code2,
   "💻": Code2,
+
+  // Trade / Resale / Товарка
+  trade: Package,
+  package: Package,
+  store: Store,
+  "shopping-bag": ShoppingBag,
+  "trending-up": TrendingUp,
+  "📦": Package,
+  "🛍️": ShoppingBag,
 
   // Habits & Extras
   water: Droplets,

@@ -1,4 +1,4 @@
-export type ModuleCategory = 'gym' | '3d' | 'savings' | 'reading' | 'english' | 'work' | 'custom';
+export type ModuleCategory = 'gym' | '3d' | 'savings' | 'reading' | 'english' | 'work' | 'trade' | 'custom';
 
 export interface ModuleItem {
   id: string;
@@ -178,4 +178,29 @@ export interface DailyMetrics {
   targetCalories: number;
   proteinGrams: number;
   focusMinutes: number;
+}
+
+// TRADE / RESALE / ТОВАРКА
+export interface TradeProduct {
+  id: string;
+  title: string;
+  buyPriceRub: number;     // Себестоимость закупки за штуку
+  sellPriceRub: number;    // Цена продажи за штуку
+  totalQuantity: number;   // Всего закуплено
+  stockQuantity: number;   // Остаток на складе
+  category?: string;       // Категория товара
+  dateAdded: string;
+}
+
+export interface TradeSale {
+  id: string;
+  productId: string;
+  productTitle: string;
+  quantity: number;
+  salePriceRub: number;    // Цена фактической продажи за штуку
+  costPriceRub: number;    // Себестоимость за штуку
+  profitRub: number;       // (salePriceRub - costPriceRub) * quantity
+  revenueRub: number;      // salePriceRub * quantity
+  channel?: string;        // Авито, ТГ, Лично, Маркетплейс
+  date: string;
 }

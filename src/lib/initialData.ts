@@ -64,8 +64,19 @@ export const initialModules: ModuleItem[] = [
     icon: "briefcase",
     accentColor: "indigo",
     borderColor: "border-white/[0.06] hover:border-indigo-500/40",
-    previewValue: "3 задачи",
-    previewSubtext: "2.5 ч фокуса",
+    previewValue: "0 задач",
+    previewSubtext: "Фокус-сессии дня",
+  },
+  {
+    id: "trade",
+    title: "Товарка & Бизнес",
+    subtitle: "Склад, продажи и прибыль",
+    category: "trade",
+    icon: "package",
+    accentColor: "rose",
+    borderColor: "border-white/[0.06] hover:border-rose-500/40",
+    previewValue: "0 ₽",
+    previewSubtext: "Склад и продажи",
   },
 ];
 
