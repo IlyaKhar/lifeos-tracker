@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
+import { GoogleGenAI } from "@google/genai";
 
-// 1. Smart built-in offline knowledge engine (failsafe)
+// Smart built-in offline knowledge engine (failsafe)
 function getSmartFallbackResponse(prompt: string, context?: any): string {
   const p = prompt.toLowerCase();
 
@@ -53,31 +54,35 @@ function getSmartFallbackResponse(prompt: string, context?: any): string {
 💡 *Лайфхак:* Учи слова не по отдельности, а сразу в готовых фразах и контексте!`;
   }
 
-  if (p.includes("книг") || p.includes("чита") || p.includes("учеб") || p.includes("работ") || p.includes("задач")) {
-    return `📚 **Как читать и учиться без прокрастинации:**
-1. **Правило 10 страниц:** Читай каждый день минимум 10 страниц. Это 300 страниц в месяц — ровно одна хорошая книга!
-2. **Pomodoro 25/5:** 25 минут полного фокуса с выключенными уведомлениями + 5 минут разминки. За 4 сессии делается норма целого дня!`;
-  }
-
   return `🤖 Привет, Илья! Я твой AI-коуч в LifeOS. Могу составить программу тренировок, расписать бюджет на Пассат, подсказать расчет цен в 3D-печати или английские фразы. Спрашивай о чем угодно!`;
 }
 
-// 2. Main AI Request Handler (Multi-Tier Architecture: Gemini Key -> Live Zero-Config AI -> Fallback)
 export async function POST(req: Request) {
   try {
     const { prompt, userContext, apiKey } = await req.json();
-
     const rawKey = (apiKey || process.env.GEMINI_API_KEY || "").trim().replace(/^["']|["']$/g, "");
+
     const systemInstruction = `Ты — Алина, умный, поддерживающий и практичный AI-коуч в приложении LifeOS. Пользователя зовут Илья. Отвечай кратко, по делу, дружелюбно и практично на русском языке. При необходимости давай конкретные цифры и шаги.`;
 
-    // Tier 1: If user supplied Gemini API key, try Google Gemini
-    if (rawKey && (rawKey.startsWith("AIza") || rawKey.startsWith("AQ."))) {
-      const modelsToTry = ["gemini-1.5-flash", "gemini-2.0-flash"];
+    // 1. If key is provided and looks like Gemini (starts with AQ. or AIza)
+    if (rawKey && (rawKey.startsWith("AQ.") || rawKey.startsWith("AIza"))) {
+      try {
+        const ai = new GoogleGenAI({ apiKey: rawKey });
+        // Try gemini-1.5-flash or gemini-2.0-flash
+        const response = await ai.models.generateContent({
+          model: "gemini-1.5-flash",
+          contents: `${systemInstruction}\n\nВопрос Ильи: ${prompt}`,
+        });
 
-      for (const model of modelsToTry) {
+        if (response?.text) {
+          return NextResponse.json({ reply: response.text });
+        }
+      } catch (geminiErr: any) {
+        console.error("Gemini SDK error:", geminiErr);
+        // Fallback to direct fetch with x-goog-api-key
         try {
-          const res = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+          const directRes = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(rawKey)}`,
             {
               method: "POST",
               headers: {
@@ -95,20 +100,64 @@ export async function POST(req: Request) {
             }
           );
 
-          if (res.ok) {
-            const data = await res.json();
+          if (directRes.ok) {
+            const data = await directRes.json();
             const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
             if (text) {
               return NextResponse.json({ reply: text });
             }
           }
         } catch (e) {
-          // Continue to next tier
+          // ignore
         }
       }
     }
 
-    // Tier 2: Live AI Endpoint (No API key needed, zero-config, works everywhere!)
+    // 2. If key is OpenAI / Groq / OpenRouter (sk-... or gsk_...)
+    if (rawKey && (rawKey.startsWith("sk-") || rawKey.startsWith("gsk_"))) {
+      try {
+        const isGroq = rawKey.startsWith("gsk_");
+        const isOpenRouter = rawKey.startsWith("sk-or-");
+        const endpoint = isGroq
+          ? "https://api.groq.com/openai/v1/chat/completions"
+          : isOpenRouter
+          ? "https://openrouter.ai/api/v1/chat/completions"
+          : "https://api.openai.com/v1/chat/completions";
+
+        const model = isGroq
+          ? "llama-3.3-70b-versatile"
+          : isOpenRouter
+          ? "meta-llama/llama-3.3-70b-instruct:free"
+          : "gpt-4o-mini";
+
+        const oaiRes = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${rawKey}`,
+          },
+          body: JSON.stringify({
+            model,
+            messages: [
+              { role: "system", content: systemInstruction },
+              { role: "user", content: prompt },
+            ],
+          }),
+        });
+
+        if (oaiRes.ok) {
+          const oaiData = await oaiRes.json();
+          const reply = oaiData.choices?.[0]?.message?.content;
+          if (reply) {
+            return NextResponse.json({ reply });
+          }
+        }
+      } catch (e) {
+        // Continue
+      }
+    }
+
+    // 3. Live AI Fallback (Zero-config, real AI generation)
     try {
       const livePrompt = `${systemInstruction}\n\nВопрос Ильи: ${prompt}`;
       const liveRes = await fetch(`https://text.pollinations.ai/${encodeURIComponent(livePrompt)}`, {
@@ -122,15 +171,15 @@ export async function POST(req: Request) {
         }
       }
     } catch (e) {
-      // Continue to Tier 3 fallback
+      // Continue to static failsafe
     }
 
-    // Tier 3: High-quality built-in knowledge engine (always instant, always works)
+    // 4. Built-in knowledge engine (always works)
     const reply = getSmartFallbackResponse(prompt, userContext);
     return NextResponse.json({ reply });
   } catch (error: any) {
     return NextResponse.json(
-      { reply: "Я здесь и готова помочь! Спроси про тренировки, накопления на Пассат, 3D-печать или задачи." },
+      { reply: "Я на связи! Спроси о тренировках, накоплениях на Пассат, 3D-печати или задачах." },
       { status: 200 }
     );
   }
