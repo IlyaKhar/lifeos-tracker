@@ -11,10 +11,8 @@ import {
   Plus,
   Check,
   TrendingDown,
-  Flame,
-  Utensils,
-  Play,
   RotateCcw,
+  UtensilsCrossed,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 
@@ -41,7 +39,6 @@ export const GymModule: React.FC = () => {
       }, 1000);
     } else if (timerSeconds === 0 && isTimerRunning) {
       setIsTimerRunning(false);
-      // Play sound or vibration if supported
       if (typeof navigator !== "undefined" && navigator.vibrate) {
         navigator.vibrate([200, 100, 200]);
       }
@@ -82,7 +79,7 @@ export const GymModule: React.FC = () => {
                   if (s.id === setId) {
                     const nextVal = !s.completed;
                     if (nextVal) {
-                      startTimer(90); // Start 90 sec rest timer!
+                      startTimer(90);
                     }
                     return { ...s, completed: nextVal };
                   }
@@ -108,14 +105,16 @@ export const GymModule: React.FC = () => {
 
   return (
     <div className="space-y-4 pb-12">
-      {/* Rest Timer Floating Bar (if active) */}
+      {/* Rest Timer Floating Bar */}
       {timerSeconds > 0 && (
-        <div className="sticky top-16 z-30 p-3 rounded-2xl bg-emerald-500/20 border border-emerald-500/50 backdrop-blur-md flex items-center justify-between text-emerald-300 shadow-xl">
-          <div className="flex items-center gap-2">
-            <Timer className="w-5 h-5 animate-pulse text-emerald-400" />
+        <div className="sticky top-16 z-30 p-3.5 rounded-2xl bg-[#1c2230] border border-emerald-500/30 backdrop-blur-md flex items-center justify-between shadow-xl">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+              <Timer className="w-4 h-4 animate-pulse" />
+            </div>
             <div>
-              <div className="text-xs font-semibold">Отдых между подходами</div>
-              <div className="text-base font-mono font-extrabold text-white">
+              <div className="text-[11px] font-semibold text-slate-300">Отдых между подходами</div>
+              <div className="text-base font-mono font-bold text-white">
                 {formatTimer(timerSeconds)}
               </div>
             </div>
@@ -123,16 +122,16 @@ export const GymModule: React.FC = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsTimerRunning(!isTimerRunning)}
-              className="px-2.5 py-1 rounded-xl bg-emerald-500 text-slate-950 text-xs font-bold"
+              className="px-3 py-1.5 rounded-full bg-emerald-400 text-slate-950 text-xs font-bold"
             >
-              {isTimerRunning ? "Пауза" : "Продолжить"}
+              {isTimerRunning ? "Пауза" : "Дальше"}
             </button>
             <button
               onClick={() => {
                 setIsTimerRunning(false);
                 setTimerSeconds(0);
               }}
-              className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300"
+              className="p-1.5 rounded-full bg-white/[0.06] hover:bg-white/[0.1] text-slate-300"
             >
               <RotateCcw className="w-4 h-4" />
             </button>
@@ -140,50 +139,50 @@ export const GymModule: React.FC = () => {
         </div>
       )}
 
-      {/* 1. Body Weight Card with Visual Progression */}
-      <div className="glass-card p-4 rounded-2xl border border-emerald-500/20 space-y-3">
+      {/* 1. Body Weight Card */}
+      <div className="apple-card p-4 rounded-3xl space-y-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
               <Scale className="w-4 h-4" />
             </div>
             <div>
-              <div className="text-xs font-bold text-slate-200">Вес тела и Прогресс</div>
-              <div className="text-[11px] text-slate-400">Цель: 76.0 кг (сушка)</div>
+              <div className="text-xs font-bold text-white tracking-tight">Вес тела</div>
+              <div className="text-[10px] text-slate-400">Цель: 75.0 кг (сушка)</div>
             </div>
           </div>
           <button
             onClick={() => setIsAddingWeight(true)}
-            className="px-2.5 py-1 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 text-xs font-bold flex items-center gap-1 transition-all"
+            className="px-3 py-1 rounded-full bg-white/[0.05] hover:bg-white/[0.08] text-slate-200 text-xs font-semibold flex items-center gap-1 transition-all"
           >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Взвешивание</span>
+            <Plus className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Замер</span>
           </button>
         </div>
 
-        {/* Input Modal / Inline Form */}
+        {/* Input Inline */}
         {isAddingWeight && (
-          <div className="p-3 rounded-xl bg-slate-900 border border-emerald-500/40 flex items-center gap-2">
+          <div className="p-3 rounded-2xl bg-[#1b1f2a] border border-white/[0.08] flex items-center gap-2">
             <input
               type="number"
               step="0.1"
               placeholder="78.2"
               value={newWeight}
               onChange={(e) => setNewWeight(e.target.value)}
-              className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm font-mono text-white focus:outline-none focus:border-emerald-500"
+              className="flex-1 bg-black/30 border border-white/[0.08] rounded-xl px-3 py-1.5 text-sm font-mono text-white focus:outline-none focus:border-emerald-500"
               autoFocus
             />
             <button
               onClick={handleSaveWeight}
-              className="px-3 py-1.5 bg-emerald-500 text-slate-950 font-bold rounded-lg text-xs"
+              className="px-4 py-1.5 bg-emerald-400 text-slate-950 font-bold rounded-xl text-xs"
             >
-              Сохранить
+              ОК
             </button>
             <button
               onClick={() => setIsAddingWeight(false)}
-              className="px-2 py-1.5 text-slate-400 text-xs hover:text-white"
+              className="px-2.5 py-1.5 text-slate-400 text-xs hover:text-white"
             >
-              Отмена
+              ✕
             </button>
           </div>
         )}
@@ -191,20 +190,20 @@ export const GymModule: React.FC = () => {
         {/* Stats Row */}
         <div className="flex items-baseline justify-between pt-1">
           <div>
-            <span className="text-3xl font-black font-mono tracking-tight text-white">
+            <span className="text-2xl font-bold font-mono tracking-tight text-white">
               {currentWeight}
             </span>
-            <span className="text-sm font-semibold text-emerald-400 ml-1">кг</span>
+            <span className="text-xs font-semibold text-emerald-400 ml-1">кг</span>
           </div>
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-400">
+          <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-xs font-bold text-emerald-400">
             <TrendingDown className="w-3.5 h-3.5" />
             <span>{weightDelta > 0 ? `+${weightDelta}` : weightDelta} кг</span>
           </div>
         </div>
 
-        {/* Mini History Bar Chart */}
+        {/* Mini History Bar Chart (Apple Style) */}
         <div className="pt-2">
-          <div className="flex items-end justify-between gap-1.5 h-16 px-1 border-b border-white/10 pb-1">
+          <div className="flex items-end justify-between gap-1.5 h-14 px-1 border-b border-white/[0.04] pb-1">
             {weightLogs.slice(-7).map((log, idx, arr) => {
               const minW = 77;
               const maxW = 80;
@@ -215,11 +214,11 @@ export const GymModule: React.FC = () => {
               const isLast = idx === arr.length - 1;
               return (
                 <div key={log.id} className="flex-1 flex flex-col items-center gap-1">
-                  <div className="w-full flex justify-center items-end h-12">
+                  <div className="w-full flex justify-center items-end h-10">
                     <div
                       style={{ height: `${hPercent}%` }}
-                      className={`w-full max-w-[28px] rounded-t transition-all ${
-                        isLast ? "bg-emerald-400 shadow-md shadow-emerald-500/30" : "bg-emerald-500/30 hover:bg-emerald-500/50"
+                      className={`w-full max-w-[24px] rounded-t-lg transition-all ${
+                        isLast ? "bg-emerald-400" : "bg-white/[0.08] hover:bg-white/[0.15]"
                       }`}
                     />
                   </div>
@@ -237,57 +236,56 @@ export const GymModule: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. Nutrition & Calories Summary */}
-      <div className="glass-card p-4 rounded-2xl border border-white/10 space-y-3">
+      {/* 2. Nutrition Summary */}
+      <div className="apple-card p-4 rounded-3xl space-y-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400">
-              <Utensils className="w-4 h-4" />
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+              <UtensilsCrossed className="w-4 h-4" />
             </div>
             <div>
-              <div className="text-xs font-bold text-slate-200">Питание & КБЖУ</div>
-              <div className="text-[11px] text-slate-400">Цель: 2 400 ккал / день</div>
+              <div className="text-xs font-bold text-white tracking-tight">Питание & КБЖУ</div>
+              <div className="text-[10px] text-slate-400">Цель: 2 400 ккал в день</div>
             </div>
           </div>
           <span className="text-xs font-mono font-bold text-amber-400">1 850 / 2 400</span>
         </div>
 
-        {/* Macros Bars */}
-        <div className="grid grid-cols-3 gap-2 pt-1 text-center">
-          <div className="p-2 rounded-xl bg-slate-900/60 border border-white/5">
+        <div className="grid grid-cols-3 gap-2 text-center">
+          <div className="p-2.5 rounded-2xl bg-white/[0.03]">
             <span className="text-[10px] uppercase font-bold text-emerald-400">Белки</span>
             <div className="text-xs font-mono font-bold text-white mt-0.5">145 / 160 г</div>
-            <div className="w-full bg-white/10 h-1 rounded-full mt-1 overflow-hidden">
+            <div className="w-full bg-white/[0.06] h-1 rounded-full mt-1.5 overflow-hidden">
               <div className="bg-emerald-400 h-full w-[90%]" />
             </div>
           </div>
-          <div className="p-2 rounded-xl bg-slate-900/60 border border-white/5">
+          <div className="p-2.5 rounded-2xl bg-white/[0.03]">
             <span className="text-[10px] uppercase font-bold text-amber-400">Жиры</span>
             <div className="text-xs font-mono font-bold text-white mt-0.5">58 / 70 г</div>
-            <div className="w-full bg-white/10 h-1 rounded-full mt-1 overflow-hidden">
+            <div className="w-full bg-white/[0.06] h-1 rounded-full mt-1.5 overflow-hidden">
               <div className="bg-amber-400 h-full w-[82%]" />
             </div>
           </div>
-          <div className="p-2 rounded-xl bg-slate-900/60 border border-white/5">
+          <div className="p-2.5 rounded-2xl bg-white/[0.03]">
             <span className="text-[10px] uppercase font-bold text-sky-400">Углеводы</span>
             <div className="text-xs font-mono font-bold text-white mt-0.5">210 / 280 г</div>
-            <div className="w-full bg-white/10 h-1 rounded-full mt-1 overflow-hidden">
+            <div className="w-full bg-white/[0.06] h-1 rounded-full mt-1.5 overflow-hidden">
               <div className="bg-sky-400 h-full w-[75%]" />
             </div>
           </div>
         </div>
       </div>
 
-      {/* 3. Workout Sessions & Progressive Overload */}
+      {/* 3. Workout Sessions */}
       <div className="space-y-3">
         <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-400">
-            <Dumbbell className="w-4 h-4 text-emerald-400" />
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+            <Dumbbell className="w-3.5 h-3.5 text-emerald-400" />
             <span>Тренировочный дневник</span>
           </div>
           <button
             onClick={() => startTimer(90)}
-            className="text-[11px] text-emerald-400 hover:underline flex items-center gap-1"
+            className="text-[11px] text-emerald-400 font-semibold hover:underline flex items-center gap-1"
           >
             <Timer className="w-3.5 h-3.5" />
             <span>Таймер 90с</span>
@@ -297,16 +295,16 @@ export const GymModule: React.FC = () => {
         {workouts.map((workout) => (
           <div
             key={workout.id}
-            className="glass-card p-4 rounded-2xl border border-white/10 space-y-3.5"
+            className="apple-card p-4 rounded-3xl space-y-3.5"
           >
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="font-bold text-sm text-slate-100">{workout.name}</h4>
+                <h4 className="font-bold text-sm text-white tracking-tight">{workout.name}</h4>
                 <p className="text-[10px] text-slate-400">
                   {workout.date} • {workout.durationMinutes} мин
                 </p>
               </div>
-              <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold">
+              <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-bold">
                 Активная сессия
               </span>
             </div>
@@ -316,16 +314,16 @@ export const GymModule: React.FC = () => {
               {workout.exercises.map((ex, exIdx) => (
                 <div
                   key={ex.id}
-                  className="p-3 rounded-xl bg-slate-900/80 border border-white/5 space-y-2"
+                  className="p-3 rounded-2xl bg-[#1b1f2a] space-y-2"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-200">
+                    <span className="text-xs font-bold text-white">
                       {exIdx + 1}. {ex.name}
                     </span>
                     {ex.isPR && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-bold border border-amber-500/30">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 text-[10px] font-bold">
                         <Trophy className="w-3 h-3 text-amber-400" />
-                        Личный рекорд (PR)
+                        Рекорд (PR)
                       </span>
                     )}
                   </div>
@@ -336,10 +334,10 @@ export const GymModule: React.FC = () => {
                       <button
                         key={s.id}
                         onClick={() => toggleSetComplete(workout.id, ex.id, s.id)}
-                        className={`p-2 rounded-lg border text-left transition-all flex flex-col justify-between ${
+                        className={`p-2.5 rounded-xl border text-left transition-all flex flex-col justify-between ${
                           s.completed
-                            ? "bg-emerald-500/15 border-emerald-500/50 text-emerald-300"
-                            : "bg-slate-800/60 border-white/5 text-slate-300 hover:border-white/20"
+                            ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300"
+                            : "bg-white/[0.03] border-transparent text-slate-300 hover:bg-white/[0.06]"
                         }`}
                       >
                         <div className="flex items-center justify-between text-[10px] text-slate-400 mb-1">
@@ -365,4 +363,3 @@ export const GymModule: React.FC = () => {
     </div>
   );
 };
-

@@ -104,7 +104,8 @@ export default function Home() {
     <div className="min-h-screen flex flex-col bg-slate-950 max-w-lg mx-auto border-x border-white/5 relative shadow-2xl">
       {/* Top App Header */}
       <Header
-        activeModuleTitle={activeModule ? `${activeModule.icon} ${activeModule.title}` : undefined}
+        activeModuleTitle={activeModule?.title}
+        activeModuleIcon={activeModule?.icon || activeModule?.category}
         userName={profile?.name || "Малой"}
         onBack={() => setActiveModule(null)}
         onOpenQuickAction={() => setIsQuickActionOpen(true)}

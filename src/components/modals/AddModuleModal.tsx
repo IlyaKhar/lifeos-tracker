@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Sparkles } from "lucide-react";
+import { X, Sparkles, Music, Car, Code2, Heart, Activity, Dumbbell, Wallet, BookOpen, Layers, Flame, Trophy } from "lucide-react";
 import { ModuleItem } from "@/types";
+import { AppIcon } from "@/components/common/AppIcon";
 import confetti from "canvas-confetti";
 
 interface AddModuleModalProps {
@@ -11,19 +12,32 @@ interface AddModuleModalProps {
   onAddModule: (module: ModuleItem) => void;
 }
 
-const PRESET_ICONS = ["🎸", "🧘", "🚗", "💻", "🎨", "⚽", "🧠", "☕", "📈", "🕹️"];
+const PRESET_ICONS = [
+  { id: "music", label: "Музыка" },
+  { id: "car", label: "Авто" },
+  { id: "code", label: "Код" },
+  { id: "activity", label: "Здоровье" },
+  { id: "heart", label: "Привычки" },
+  { id: "dumbbell", label: "Спорт" },
+  { id: "layers", label: "3D/Крафт" },
+  { id: "wallet", label: "Финансы" },
+  { id: "book-open", label: "Учеба" },
+  { id: "flame", label: "Стрик" },
+];
+
 const PRESET_COLORS = [
-  { name: "Emerald", accent: "from-emerald-500/15 text-emerald-400", border: "border-emerald-500/30 hover:border-emerald-500" },
-  { name: "Cyan", accent: "from-cyan-500/15 text-cyan-400", border: "border-cyan-500/30 hover:border-cyan-500" },
-  { name: "Purple", accent: "from-purple-500/15 text-purple-400", border: "border-purple-500/30 hover:border-purple-500" },
-  { name: "Rose", accent: "from-rose-500/15 text-rose-400", border: "border-rose-500/30 hover:border-rose-500" },
-  { name: "Amber", accent: "from-amber-500/15 text-amber-400", border: "border-amber-500/30 hover:border-amber-500" },
+  { name: "emerald", label: "Мята" },
+  { name: "orange", label: "Оранж" },
+  { name: "amber", label: "Золото" },
+  { name: "sky", label: "Лазурь" },
+  { name: "purple", label: "Индиго" },
+  { name: "indigo", label: "Кобальт" },
 ];
 
 export const AddModuleModal: React.FC<AddModuleModalProps> = ({ isOpen, onClose, onAddModule }) => {
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
-  const [icon, setIcon] = useState("🎸");
+  const [selectedIcon, setSelectedIcon] = useState("music");
   const [selectedColor, setSelectedColor] = useState(PRESET_COLORS[0]);
 
   if (!isOpen) return null;
@@ -37,9 +51,9 @@ export const AddModuleModal: React.FC<AddModuleModalProps> = ({ isOpen, onClose,
       title: title.trim(),
       subtitle: subtitle.trim() || "Личный трекер",
       category: "custom",
-      icon,
-      accentColor: selectedColor.accent,
-      borderColor: selectedColor.border,
+      icon: selectedIcon,
+      accentColor: selectedColor.name,
+      borderColor: "border-white/[0.06]",
       previewValue: "0 записей",
       previewSubtext: "Только что создан",
       isCustom: true,
@@ -53,42 +67,43 @@ export const AddModuleModal: React.FC<AddModuleModalProps> = ({ isOpen, onClose,
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="w-full max-w-sm glass-panel rounded-3xl border border-white/15 p-5 space-y-4 shadow-2xl">
-        <div className="flex items-center justify-between pb-2 border-b border-white/10">
+    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+      <div className="w-full max-w-sm apple-card rounded-3xl p-5 space-y-4 shadow-2xl">
+        <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
           <div className="flex items-center gap-2">
-            <span className="p-1 rounded-lg bg-emerald-500/20 text-emerald-400">
-              <Sparkles className="w-4 h-4" />
-            </span>
-            <h3 className="text-sm font-bold text-slate-100">Создать свой модуль</h3>
+            <div className="w-7 h-7 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+              <Sparkles className="w-3.5 h-3.5" />
+            </div>
+            <h3 className="text-sm font-bold text-white tracking-tight">Добавить сферу</h3>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-full bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white"
+            className="w-7 h-7 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-slate-400 hover:text-white flex items-center justify-center"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3.5">
-          {/* Icon Selector */}
+          {/* Icon Selector (Vector Icons) */}
           <div>
-            <label className="text-[11px] font-semibold text-slate-400 block mb-1.5">
-              Иконка
+            <label className="text-[11px] font-semibold text-slate-300 block mb-1.5">
+              Иконка сферы
             </label>
-            <div className="flex flex-wrap gap-1.5">
-              {PRESET_ICONS.map((emoji) => (
+            <div className="grid grid-cols-5 gap-1.5">
+              {PRESET_ICONS.map((it) => (
                 <button
                   type="button"
-                  key={emoji}
-                  onClick={() => setIcon(emoji)}
-                  className={`w-9 h-9 rounded-xl text-lg flex items-center justify-center transition-all ${
-                    icon === emoji
-                      ? "bg-emerald-500/30 border border-emerald-500 scale-105"
-                      : "bg-white/5 hover:bg-white/10 border border-white/5"
+                  key={it.id}
+                  onClick={() => setSelectedIcon(it.id)}
+                  className={`h-10 rounded-2xl flex items-center justify-center transition-all ${
+                    selectedIcon === it.id
+                      ? "bg-emerald-400 text-slate-950 font-bold scale-105 shadow-sm"
+                      : "bg-white/[0.04] hover:bg-white/[0.08] text-slate-300"
                   }`}
+                  title={it.label}
                 >
-                  {emoji}
+                  <AppIcon name={it.id} className="w-4 h-4" />
                 </button>
               ))}
             </div>
@@ -96,51 +111,51 @@ export const AddModuleModal: React.FC<AddModuleModalProps> = ({ isOpen, onClose,
 
           {/* Title */}
           <div>
-            <label className="text-[11px] font-semibold text-slate-400 block mb-1">
-              Название модуля
+            <label className="text-[11px] font-semibold text-slate-300 block mb-1">
+              Название
             </label>
             <input
               type="text"
-              placeholder="Например: Гитара, Медитация, Бег"
+              placeholder="Гитара, Медитация, Бег"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
+              className="w-full bg-[#1b1f2a] border border-white/[0.08] rounded-2xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
               required
             />
           </div>
 
           {/* Subtitle */}
           <div>
-            <label className="text-[11px] font-semibold text-slate-400 block mb-1">
-              Подзаголовок / описание
+            <label className="text-[11px] font-semibold text-slate-300 block mb-1">
+              Краткое описание
             </label>
             <input
               type="text"
-              placeholder="Аккорды, практика 20 мин/день"
+              placeholder="Аккорды, практика 20 мин в день"
               value={subtitle}
               onChange={(e) => setSubtitle(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
+              className="w-full bg-[#1b1f2a] border border-white/[0.08] rounded-2xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
             />
           </div>
 
           {/* Color theme */}
           <div>
-            <label className="text-[11px] font-semibold text-slate-400 block mb-1.5">
-              Цветовая тема
+            <label className="text-[11px] font-semibold text-slate-300 block mb-1.5">
+              Цветовой акцент
             </label>
-            <div className="flex gap-2">
+            <div className="grid grid-cols-6 gap-1.5">
               {PRESET_COLORS.map((col) => (
                 <button
                   type="button"
                   key={col.name}
                   onClick={() => setSelectedColor(col)}
-                  className={`flex-1 py-1 rounded-xl text-[10px] font-bold border transition-all ${
+                  className={`py-1 rounded-xl text-[10px] font-semibold border transition-all text-center ${
                     selectedColor.name === col.name
-                      ? "bg-white/20 border-white text-white"
-                      : "bg-white/5 border-white/5 text-slate-400 hover:text-white"
+                      ? "bg-white/[0.15] border-white text-white"
+                      : "bg-white/[0.03] border-transparent text-slate-400 hover:text-white"
                   }`}
                 >
-                  {col.name}
+                  {col.label}
                 </button>
               ))}
             </div>
@@ -148,13 +163,12 @@ export const AddModuleModal: React.FC<AddModuleModalProps> = ({ isOpen, onClose,
 
           <button
             type="submit"
-            className="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-600 hover:to-emerald-500 text-slate-950 font-bold rounded-xl text-xs shadow-lg shadow-emerald-500/20 active:scale-95 transition-all mt-2"
+            className="w-full py-2.5 bg-white text-slate-950 font-bold rounded-2xl text-xs shadow-md hover:bg-slate-100 active:scale-95 transition-all mt-2"
           >
-            Создать модуль
+            Создать сферу
           </button>
         </form>
       </div>
     </div>
   );
 };
-

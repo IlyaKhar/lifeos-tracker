@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { UserProfile, FitnessGoal } from "@/types";
-import { Sparkles, ArrowRight, ArrowLeft, Check, Dumbbell, Target, User, Heart } from "lucide-react";
+import { Sparkles, ArrowRight, ArrowLeft, Dumbbell, Target, User, Flame, Activity, Zap } from "lucide-react";
 import confetti from "canvas-confetti";
 
 interface OnboardingModalProps {
@@ -55,23 +55,19 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
       createdAt: new Date().toISOString(),
     };
 
-    confetti({ particleCount: 70, spread: 80, origin: { y: 0.6 } });
+    confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
     onComplete(profile);
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
-      <div className="w-full max-w-md glass-panel rounded-3xl border border-white/15 p-6 shadow-2xl relative overflow-hidden flex flex-col justify-between min-h-[480px]">
-        
-        {/* Glow ambient */}
-        <div className="absolute -top-16 -right-16 w-40 h-40 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-16 -left-16 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl pointer-events-none" />
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
+      <div className="w-full max-w-md apple-card rounded-3xl p-6 shadow-2xl relative flex flex-col justify-between min-h-[480px]">
 
         {/* Step Progress Bar */}
         <div>
           <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-400">
-              Шаг {step} из 3 • Настройка твоего LifeOS
+              Шаг {step} из 3 • Настройка профиля
             </span>
             {onClose && (
               <button
@@ -82,10 +78,10 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
               </button>
             )}
           </div>
-          <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+          <div className="w-full bg-white/[0.06] h-1.5 rounded-full overflow-hidden">
             <div
               style={{ width: `${(step / 3) * 100}%` }}
-              className="bg-gradient-to-r from-emerald-500 to-cyan-400 h-full rounded-full transition-all duration-300"
+              className="bg-emerald-400 h-full rounded-full transition-all duration-300"
             />
           </div>
         </div>
@@ -93,12 +89,12 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
         {/* STEP 1: Имя и возраст */}
         {step === 1 && (
           <div className="space-y-4 my-auto py-4">
-            <div className="flex items-center gap-2.5">
-              <span className="p-2.5 rounded-2xl bg-emerald-500/20 text-emerald-400">
-                <User className="w-6 h-6" />
-              </span>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                <User className="w-5 h-5" />
+              </div>
               <div>
-                <h2 className="text-lg font-extrabold text-white">Давай знакомиться!</h2>
+                <h2 className="text-base font-bold text-white tracking-tight">Давай знакомиться</h2>
                 <p className="text-xs text-slate-400">Как к тебе обращаться в приложении?</p>
               </div>
             </div>
@@ -106,14 +102,14 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
             <div className="space-y-3 pt-2">
               <div>
                 <label className="text-xs font-semibold text-slate-300 block mb-1">
-                  Твоё имя или ник
+                  Твоё имя
                 </label>
                 <input
                   type="text"
                   placeholder="Илья"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 focus:border-emerald-500 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none"
+                  className="w-full bg-[#1b1f2a] border border-white/[0.08] focus:border-emerald-500 rounded-2xl px-4 py-2.5 text-sm text-white focus:outline-none"
                   autoFocus
                 />
               </div>
@@ -125,7 +121,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   placeholder="22"
                   value={age}
                   onChange={(e) => setAge(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 focus:border-emerald-500 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none"
+                  className="w-full bg-[#1b1f2a] border border-white/[0.08] focus:border-emerald-500 rounded-2xl px-4 py-2.5 text-sm text-white focus:outline-none"
                 />
               </div>
             </div>
@@ -135,13 +131,13 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
         {/* STEP 2: Тело и цели в зале */}
         {step === 2 && (
           <div className="space-y-4 my-auto py-2">
-            <div className="flex items-center gap-2.5">
-              <span className="p-2.5 rounded-2xl bg-emerald-500/20 text-emerald-400">
-                <Dumbbell className="w-6 h-6" />
-              </span>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                <Dumbbell className="w-5 h-5" />
+              </div>
               <div>
-                <h2 className="text-lg font-extrabold text-white">Физическая форма</h2>
-                <p className="text-xs text-slate-400">Поможет рассчитать чекпоинты и калории</p>
+                <h2 className="text-base font-bold text-white tracking-tight">Физическая форма</h2>
+                <p className="text-xs text-slate-400">Для расчета чекпоинтов и прогресса</p>
               </div>
             </div>
 
@@ -156,7 +152,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   placeholder="78.4"
                   value={currentWeight}
                   onChange={(e) => setCurrentWeight(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none"
+                  className="w-full bg-[#1b1f2a] border border-white/[0.08] focus:border-emerald-500 rounded-2xl px-3 py-2 text-sm text-white font-mono focus:outline-none"
                 />
               </div>
               <div>
@@ -169,7 +165,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   placeholder="75.0"
                   value={targetWeight}
                   onChange={(e) => setTargetWeight(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none"
+                  className="w-full bg-[#1b1f2a] border border-white/[0.08] focus:border-emerald-500 rounded-2xl px-3 py-2 text-sm text-white font-mono focus:outline-none"
                 />
               </div>
             </div>
@@ -180,39 +176,44 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
               </label>
               <div className="grid grid-cols-2 gap-2 text-xs">
                 {[
-                  { id: "lose_weight", label: "🔥 Сушка / Сбросить вес" },
-                  { id: "build_muscle", label: "💪 Набор сухой массы" },
-                  { id: "strength", label: "⚡ Рост силовых (PR)" },
-                  { id: "keep_fit", label: "🧘 Тонус и здоровье" },
-                ].map((g) => (
-                  <button
-                    type="button"
-                    key={g.id}
-                    onClick={() => setFitnessGoal(g.id as FitnessGoal)}
-                    className={`p-2.5 rounded-xl border text-left transition-all font-medium ${
-                      fitnessGoal === g.id
-                        ? "bg-emerald-500/20 border-emerald-500 text-emerald-300"
-                        : "bg-slate-900/60 border-white/5 text-slate-300 hover:border-white/20"
-                    }`}
-                  >
-                    {g.label}
-                  </button>
-                ))}
+                  { id: "lose_weight", label: "Сушка / Сбросить вес", icon: Flame },
+                  { id: "build_muscle", label: "Набор сухой массы", icon: Dumbbell },
+                  { id: "strength", label: "Рост силовых (PR)", icon: Zap },
+                  { id: "keep_fit", label: "Тонус и здоровье", icon: Activity },
+                ].map((g) => {
+                  const Icon = g.icon;
+                  const isSel = fitnessGoal === g.id;
+                  return (
+                    <button
+                      type="button"
+                      key={g.id}
+                      onClick={() => setFitnessGoal(g.id as FitnessGoal)}
+                      className={`p-3 rounded-2xl border text-left transition-all flex items-center gap-2 ${
+                        isSel
+                          ? "bg-emerald-500/15 border-emerald-500/50 text-white font-semibold"
+                          : "bg-white/[0.03] border-transparent text-slate-300 hover:bg-white/[0.06]"
+                      }`}
+                    >
+                      <Icon className={`w-4 h-4 ${isSel ? "text-emerald-400" : "text-slate-400"}`} />
+                      <span className="text-[11px] leading-tight">{g.label}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
         )}
 
-        {/* STEP 3: Финансовая цель и старт */}
+        {/* STEP 3: Финансовая цель */}
         {step === 3 && (
           <div className="space-y-4 my-auto py-2">
-            <div className="flex items-center gap-2.5">
-              <span className="p-2.5 rounded-2xl bg-amber-500/20 text-amber-400">
-                <Target className="w-6 h-6" />
-              </span>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                <Target className="w-5 h-5" />
+              </div>
               <div>
-                <h2 className="text-lg font-extrabold text-white">Цель накоплений</h2>
-                <p className="text-xs text-slate-400">Какую главную мечту оцифруем в копилку?</p>
+                <h2 className="text-base font-bold text-white tracking-tight">Цель накоплений</h2>
+                <p className="text-xs text-slate-400">Какую цель оцифруем в копилку?</p>
               </div>
             </div>
 
@@ -226,7 +227,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   placeholder="3D-принтер Bambu Lab P1S"
                   value={savingsTargetName}
                   onChange={(e) => setSavingsTargetName(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 focus:border-amber-500 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none"
+                  className="w-full bg-[#1b1f2a] border border-white/[0.08] focus:border-amber-500 rounded-2xl px-4 py-2.5 text-sm text-white focus:outline-none"
                 />
               </div>
 
@@ -239,28 +240,21 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   placeholder="95000"
                   value={savingsTargetAmount}
                   onChange={(e) => setSavingsTargetAmount(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 focus:border-amber-500 rounded-xl px-4 py-2.5 text-sm text-white font-mono focus:outline-none"
+                  className="w-full bg-[#1b1f2a] border border-white/[0.08] focus:border-amber-500 rounded-2xl px-4 py-2.5 text-sm text-white font-mono focus:outline-none"
                 />
-              </div>
-
-              <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                <span>
-                  Мы сгенерируем для тебя персональные чекпоинты прогресса на основе этих данных!
-                </span>
               </div>
             </div>
           </div>
         )}
 
-        {/* Bottom Nav Buttons */}
-        <div className="flex items-center justify-between pt-4 border-t border-white/10">
+        {/* Bottom Nav */}
+        <div className="flex items-center justify-between pt-4 border-t border-white/[0.06]">
           {step > 1 ? (
             <button
               onClick={() => setStep(step - 1)}
-              className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition-all"
+              className="px-4 py-2 rounded-full bg-white/[0.05] hover:bg-white/[0.08] text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition-all"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-3.5 h-3.5" />
               <span>Назад</span>
             </button>
           ) : (
@@ -270,15 +264,15 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
           {step < 3 ? (
             <button
               onClick={() => setStep(step + 1)}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-600 hover:to-emerald-500 text-slate-950 text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all"
+              className="px-5 py-2.5 rounded-full bg-white text-slate-950 text-xs font-bold flex items-center gap-1.5 shadow active:scale-95 transition-all"
             >
               <span>Дальше</span>
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           ) : (
             <button
               onClick={handleFinish}
-              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-600 hover:to-emerald-500 text-slate-950 text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all"
+              className="px-6 py-2.5 rounded-full bg-emerald-400 hover:bg-emerald-500 text-slate-950 text-xs font-bold flex items-center gap-1.5 shadow active:scale-95 transition-all"
             >
               <Sparkles className="w-4 h-4" />
               <span>Создать мой план</span>

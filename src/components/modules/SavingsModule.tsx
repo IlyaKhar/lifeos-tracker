@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { SavingsGoal } from "@/types";
 import { StorageService } from "@/lib/storage";
-import { PiggyBank, Target, Plus, Sparkles, TrendingUp } from "lucide-react";
+import { Wallet, Target, Plus, Shield, Sparkles } from "lucide-react";
+import { AppIcon } from "@/components/common/AppIcon";
 import confetti from "canvas-confetti";
 
 export const SavingsModule: React.FC = () => {
@@ -11,7 +12,7 @@ export const SavingsModule: React.FC = () => {
   const [showAddGoal, setShowAddGoal] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newTarget, setNewTarget] = useState("");
-  const [newIcon, setNewIcon] = useState("🎯");
+  const [newIcon, setNewIcon] = useState("target");
 
   useEffect(() => {
     setGoals(StorageService.getSavingsGoals());
@@ -20,7 +21,7 @@ export const SavingsModule: React.FC = () => {
   const handleDeposit = (goalId: string, amount: number) => {
     const updated = StorageService.depositSavings(goalId, amount);
     setGoals(updated);
-    confetti({ particleCount: 30, spread: 50, origin: { y: 0.8 } });
+    confetti({ particleCount: 35, spread: 50, origin: { y: 0.8 } });
   };
 
   const handleCreateGoal = () => {
@@ -33,7 +34,7 @@ export const SavingsModule: React.FC = () => {
       targetAmount: target,
       currentAmount: 0,
       currency: "₽",
-      color: "emerald",
+      color: "amber",
     };
     const updated = [...goals, goal];
     setGoals(updated);
@@ -50,33 +51,33 @@ export const SavingsModule: React.FC = () => {
   return (
     <div className="space-y-4 pb-12">
       {/* 1. Overall Savings Summary */}
-      <div className="glass-card p-4 rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-950/20 via-slate-900/60 to-slate-900/60 space-y-3">
+      <div className="apple-card p-4 rounded-3xl space-y-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
-              <PiggyBank className="w-5 h-5" />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+              <Wallet className="w-5 h-5" />
             </div>
             <div>
               <span className="text-[10px] uppercase font-bold text-amber-400 tracking-wider">
                 Общий баланс накоплений
               </span>
-              <div className="text-xl font-mono font-black text-white">
+              <div className="text-xl font-mono font-bold text-white">
                 {totalSaved.toLocaleString("ru-RU")} ₽
               </div>
             </div>
           </div>
-          <span className="text-xs font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-1 rounded-lg border border-amber-500/30">
+          <span className="text-xs font-mono font-bold text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-full">
             {overallPercent}%
           </span>
         </div>
 
-        <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden border border-white/5">
+        <div className="w-full bg-white/[0.06] h-2 rounded-full overflow-hidden">
           <div
             style={{ width: `${overallPercent}%` }}
-            className="bg-gradient-to-r from-amber-500 to-emerald-400 h-full rounded-full transition-all"
+            className="bg-amber-400 h-full rounded-full transition-all"
           />
         </div>
-        <div className="flex justify-between text-[11px] text-slate-400">
+        <div className="flex justify-between text-[11px] text-slate-400 font-mono">
           <span>Собрано: {totalSaved.toLocaleString("ru-RU")} ₽</span>
           <span>Цели: {totalTarget.toLocaleString("ru-RU")} ₽</span>
         </div>
@@ -85,9 +86,9 @@ export const SavingsModule: React.FC = () => {
       {/* 2. Goals List */}
       <div className="space-y-3">
         <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-400">
-            <Target className="w-4 h-4 text-amber-400" />
-            <span>Твои Копилки & Цели</span>
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+            <Target className="w-3.5 h-3.5 text-amber-400" />
+            <span>Цели и копилки</span>
           </div>
           <button
             onClick={() => setShowAddGoal(!showAddGoal)}
@@ -98,37 +99,28 @@ export const SavingsModule: React.FC = () => {
           </button>
         </div>
 
-        {/* Add Goal Modal / Form */}
+        {/* Add Goal Inline Form */}
         {showAddGoal && (
-          <div className="p-3.5 rounded-2xl bg-slate-900 border border-amber-500/40 space-y-2.5">
-            <span className="text-xs font-bold text-slate-200">Создать новую цель накопления</span>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Иконка (🎯, 🚗, 📱)"
-                value={newIcon}
-                onChange={(e) => setNewIcon(e.target.value)}
-                className="w-14 bg-slate-800 border border-slate-700 rounded-lg px-2 text-center text-sm text-white"
-              />
-              <input
-                type="text"
-                placeholder="Название цели (Ноутбук M3)"
-                value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
-                className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white"
-              />
-            </div>
+          <div className="p-4 rounded-3xl bg-[#1b1f2a] border border-white/[0.08] space-y-2.5">
+            <span className="text-xs font-semibold text-white">Новая цель накопления</span>
+            <input
+              type="text"
+              placeholder="Название цели (Ноутбук, Отпуск)"
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              className="w-full bg-black/30 border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white"
+            />
             <div className="flex gap-2">
               <input
                 type="number"
-                placeholder="Сумма цели (120000)"
+                placeholder="Сумма цели (100000)"
                 value={newTarget}
                 onChange={(e) => setNewTarget(e.target.value)}
-                className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white"
+                className="flex-1 bg-black/30 border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white font-mono"
               />
               <button
                 onClick={handleCreateGoal}
-                className="px-4 py-1.5 bg-amber-500 text-slate-950 font-bold rounded-lg text-xs"
+                className="px-5 py-2 bg-amber-400 text-slate-950 font-bold rounded-xl text-xs active:scale-95 transition-all"
               >
                 Создать
               </button>
@@ -143,16 +135,16 @@ export const SavingsModule: React.FC = () => {
           return (
             <div
               key={goal.id}
-              className="glass-card p-4 rounded-2xl border border-white/10 space-y-3"
+              className="apple-card p-4 rounded-3xl space-y-3"
             >
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <span className="text-2xl p-1.5 rounded-xl bg-white/5 border border-white/5">
-                    {goal.icon}
-                  </span>
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                    <AppIcon name={goal.icon || "wallet"} className="w-4 h-4" />
+                  </div>
                   <div>
-                    <h4 className="text-xs font-bold text-slate-100">{goal.title}</h4>
-                    <span className="text-[10px] text-slate-400">
+                    <h4 className="text-xs font-bold text-white tracking-tight">{goal.title}</h4>
+                    <span className="text-[10px] text-slate-400 font-mono">
                       Осталось: {remaining.toLocaleString("ru-RU")} {goal.currency}
                     </span>
                   </div>
@@ -166,10 +158,10 @@ export const SavingsModule: React.FC = () => {
               </div>
 
               {/* Progress Bar */}
-              <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden border border-white/5">
+              <div className="w-full bg-white/[0.06] h-2 rounded-full overflow-hidden">
                 <div
                   style={{ width: `${pct}%` }}
-                  className="bg-gradient-to-r from-amber-500 to-emerald-400 h-full rounded-full transition-all"
+                  className="bg-amber-400 h-full rounded-full transition-all"
                 />
               </div>
 
@@ -177,19 +169,19 @@ export const SavingsModule: React.FC = () => {
               <div className="grid grid-cols-3 gap-2 pt-1">
                 <button
                   onClick={() => handleDeposit(goal.id, 500)}
-                  className="py-1.5 rounded-xl bg-white/5 hover:bg-amber-500/15 border border-white/5 hover:border-amber-500/30 text-amber-300 text-xs font-mono font-bold active:scale-95 transition-all"
+                  className="py-1.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] text-amber-300 text-xs font-mono font-semibold active:scale-95 transition-all text-center"
                 >
                   +500 ₽
                 </button>
                 <button
                   onClick={() => handleDeposit(goal.id, 1000)}
-                  className="py-1.5 rounded-xl bg-white/5 hover:bg-amber-500/15 border border-white/5 hover:border-amber-500/30 text-amber-300 text-xs font-mono font-bold active:scale-95 transition-all"
+                  className="py-1.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] text-amber-300 text-xs font-mono font-semibold active:scale-95 transition-all text-center"
                 >
                   +1 000 ₽
                 </button>
                 <button
                   onClick={() => handleDeposit(goal.id, 5000)}
-                  className="py-1.5 rounded-xl bg-white/5 hover:bg-amber-500/15 border border-white/5 hover:border-amber-500/30 text-amber-300 text-xs font-mono font-bold active:scale-95 transition-all"
+                  className="py-1.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] text-amber-300 text-xs font-mono font-semibold active:scale-95 transition-all text-center"
                 >
                   +5 000 ₽
                 </button>
@@ -201,4 +193,3 @@ export const SavingsModule: React.FC = () => {
     </div>
   );
 };
-

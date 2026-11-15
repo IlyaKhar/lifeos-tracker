@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Droplets, Scale, Coins, BookOpen, Flame } from "lucide-react";
+import { X, Droplets, Scale, Wallet, BookOpen, Sparkles } from "lucide-react";
 import confetti from "canvas-confetti";
 
 interface QuickActionModalProps {
@@ -27,21 +27,21 @@ export const QuickActionModal: React.FC<QuickActionModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex flex-col justify-end p-3 animate-in fade-in duration-200">
-      <div className="w-full max-w-md mx-auto glass-panel rounded-3xl border border-white/15 p-4 space-y-4 shadow-2xl">
+    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex flex-col justify-end p-4 animate-in fade-in duration-200">
+      <div className="w-full max-w-md mx-auto apple-card rounded-3xl p-5 space-y-4 shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between pb-1 border-b border-white/10">
+        <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
           <div className="flex items-center gap-2">
-            <span className="p-1 rounded-lg bg-emerald-500/20 text-emerald-400">
-              <Flame className="w-4 h-4" />
-            </span>
+            <div className="w-7 h-7 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+              <Sparkles className="w-3.5 h-3.5" />
+            </div>
             <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
-              Быстрый ввод за 1 клик
+              Быстрый ввод
             </span>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-full bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white"
+            className="w-7 h-7 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-slate-400 hover:text-white flex items-center justify-center"
           >
             <X className="w-4 h-4" />
           </button>
@@ -49,8 +49,8 @@ export const QuickActionModal: React.FC<QuickActionModalProps> = ({
 
         {/* Quick Weight Prompt */}
         {showWeightInput ? (
-          <div className="p-3 rounded-2xl bg-slate-900 border border-emerald-500/40 space-y-2">
-            <span className="text-xs font-bold text-slate-200">Введи вес тела (кг)</span>
+          <div className="p-3.5 rounded-2xl bg-[#1b1f2a] border border-white/[0.08] space-y-2">
+            <span className="text-xs font-semibold text-slate-200">Утренний вес тела (кг)</span>
             <div className="flex gap-2">
               <input
                 type="number"
@@ -58,7 +58,7 @@ export const QuickActionModal: React.FC<QuickActionModalProps> = ({
                 placeholder="78.2"
                 value={weightInput}
                 onChange={(e) => setWeightInput(e.target.value)}
-                className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-sm font-mono text-white"
+                className="flex-1 bg-black/30 border border-white/[0.08] rounded-xl px-3 py-2 text-sm font-mono text-white focus:outline-none focus:border-emerald-500"
                 autoFocus
               />
               <button
@@ -71,9 +71,9 @@ export const QuickActionModal: React.FC<QuickActionModalProps> = ({
                     onClose();
                   }
                 }}
-                className="px-4 py-1.5 bg-emerald-500 text-slate-950 font-bold rounded-xl text-xs"
+                className="px-5 py-2 bg-emerald-400 text-slate-950 font-bold rounded-xl text-xs active:scale-95 transition-all"
               >
-                ОК
+                Сохранить
               </button>
             </div>
           </div>
@@ -87,28 +87,28 @@ export const QuickActionModal: React.FC<QuickActionModalProps> = ({
               onAddWater(250);
               onClose();
             }}
-            className="p-3.5 rounded-2xl bg-slate-900/80 hover:bg-blue-500/10 border border-white/5 hover:border-blue-500/40 text-left transition-all active:scale-95 flex items-center gap-3 group"
+            className="p-3.5 rounded-2xl bg-white/[0.03] hover:bg-blue-500/[0.08] border border-white/[0.04] hover:border-blue-500/30 text-left transition-all active:scale-95 flex items-center gap-3"
           >
-            <div className="p-2.5 rounded-xl bg-blue-500/20 text-blue-400 group-hover:scale-110 transition-transform">
-              <Droplets className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center flex-shrink-0">
+              <Droplets className="w-4 h-4" />
             </div>
             <div>
-              <div className="font-bold text-slate-200">+250 мл воды</div>
-              <div className="text-[10px] text-slate-400">Один тап</div>
+              <div className="font-bold text-white">+250 мл воды</div>
+              <div className="text-[10px] text-slate-400">В один клик</div>
             </div>
           </button>
 
           {/* Weight */}
           <button
             onClick={() => setShowWeightInput(true)}
-            className="p-3.5 rounded-2xl bg-slate-900/80 hover:bg-emerald-500/10 border border-white/5 hover:border-emerald-500/40 text-left transition-all active:scale-95 flex items-center gap-3 group"
+            className="p-3.5 rounded-2xl bg-white/[0.03] hover:bg-emerald-500/[0.08] border border-white/[0.04] hover:border-emerald-500/30 text-left transition-all active:scale-95 flex items-center gap-3"
           >
-            <div className="p-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 group-hover:scale-110 transition-transform">
-              <Scale className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center flex-shrink-0">
+              <Scale className="w-4 h-4" />
             </div>
             <div>
-              <div className="font-bold text-slate-200">Вес сегодня</div>
-              <div className="text-[10px] text-slate-400">Утренний замер</div>
+              <div className="font-bold text-white">Вес тела</div>
+              <div className="text-[10px] text-slate-400">Записать замер</div>
             </div>
           </button>
 
@@ -118,13 +118,13 @@ export const QuickActionModal: React.FC<QuickActionModalProps> = ({
               onAddSavings(1000);
               onClose();
             }}
-            className="p-3.5 rounded-2xl bg-slate-900/80 hover:bg-amber-500/10 border border-white/5 hover:border-amber-500/40 text-left transition-all active:scale-95 flex items-center gap-3 group"
+            className="p-3.5 rounded-2xl bg-white/[0.03] hover:bg-amber-500/[0.08] border border-white/[0.04] hover:border-amber-500/30 text-left transition-all active:scale-95 flex items-center gap-3"
           >
-            <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-400 group-hover:scale-110 transition-transform">
-              <Coins className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center flex-shrink-0">
+              <Wallet className="w-4 h-4" />
             </div>
             <div>
-              <div className="font-bold text-slate-200">+1 000 ₽</div>
+              <div className="font-bold text-white">+1 000 ₽</div>
               <div className="text-[10px] text-slate-400">В копилку</div>
             </div>
           </button>
@@ -135,13 +135,13 @@ export const QuickActionModal: React.FC<QuickActionModalProps> = ({
               onAddBookPages(20);
               onClose();
             }}
-            className="p-3.5 rounded-2xl bg-slate-900/80 hover:bg-purple-500/10 border border-white/5 hover:border-purple-500/40 text-left transition-all active:scale-95 flex items-center gap-3 group"
+            className="p-3.5 rounded-2xl bg-white/[0.03] hover:bg-purple-500/[0.08] border border-white/[0.04] hover:border-purple-500/30 text-left transition-all active:scale-95 flex items-center gap-3"
           >
-            <div className="p-2.5 rounded-xl bg-purple-500/20 text-purple-400 group-hover:scale-110 transition-transform">
-              <BookOpen className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-2xl bg-purple-500/10 text-purple-400 flex items-center justify-center flex-shrink-0">
+              <BookOpen className="w-4 h-4" />
             </div>
             <div>
-              <div className="font-bold text-slate-200">+20 страниц</div>
+              <div className="font-bold text-white">+20 страниц</div>
               <div className="text-[10px] text-slate-400">Чтение зачтено</div>
             </div>
           </button>
@@ -150,4 +150,3 @@ export const QuickActionModal: React.FC<QuickActionModalProps> = ({
     </div>
   );
 };
-

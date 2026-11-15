@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Play, Pause, RotateCcw, CheckCircle2, Circle, Plus, Briefcase } from "lucide-react";
+import { Play, Pause, RotateCcw, CheckCircle2, Circle, Plus, Briefcase, Coffee, Target } from "lucide-react";
 import confetti from "canvas-confetti";
 
 interface TaskItem {
@@ -34,7 +34,7 @@ export const WorkModule: React.FC = () => {
       confetti({ particleCount: 35, spread: 50 });
       if (!isBreak) {
         setIsBreak(true);
-        setSecondsLeft(5 * 60); // 5 min break
+        setSecondsLeft(5 * 60);
       } else {
         setIsBreak(false);
         setSecondsLeft(25 * 60);
@@ -67,19 +67,30 @@ export const WorkModule: React.FC = () => {
   return (
     <div className="space-y-4 pb-12">
       {/* 1. Pomodoro Focus Timer */}
-      <div className="glass-card p-5 rounded-2xl border border-indigo-500/30 bg-gradient-to-br from-indigo-950/20 via-slate-900/60 to-slate-900/60 flex flex-col items-center text-center space-y-3">
-        <span className="text-[10px] uppercase font-bold text-indigo-400 tracking-wider">
-          {isBreak ? "☕ Перерыв (Отдых)" : "🎯 Фокус-таймер (Pomodoro)"}
-        </span>
+      <div className="apple-card p-6 rounded-3xl flex flex-col items-center text-center space-y-3">
+        <div className="flex items-center gap-2">
+          {isBreak ? (
+            <div className="w-8 h-8 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+              <Coffee className="w-4 h-4" />
+            </div>
+          ) : (
+            <div className="w-8 h-8 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+              <Target className="w-4 h-4" />
+            </div>
+          )}
+          <span className="text-[11px] uppercase font-bold text-slate-400 tracking-wider">
+            {isBreak ? "Перерыв (Отдых)" : "Фокус-таймер (Pomodoro)"}
+          </span>
+        </div>
 
-        <div className="text-4xl font-mono font-black tracking-tight text-white">
+        <div className="text-4xl font-mono font-bold tracking-tight text-white">
           {formatTime(secondsLeft)}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 pt-1">
           <button
             onClick={() => setIsRunning(!isRunning)}
-            className="px-6 py-2 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-indigo-500/25 active:scale-95 transition-all"
+            className="px-6 py-2 rounded-full bg-white text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow active:scale-95 transition-all"
           >
             {isRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
             <span>{isRunning ? "Пауза" : "Старт фокуса"}</span>
@@ -90,7 +101,7 @@ export const WorkModule: React.FC = () => {
               setSecondsLeft(25 * 60);
               setIsBreak(false);
             }}
-            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400"
+            className="p-2 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-slate-400"
           >
             <RotateCcw className="w-4 h-4" />
           </button>
@@ -98,13 +109,13 @@ export const WorkModule: React.FC = () => {
       </div>
 
       {/* 2. Task Checklist */}
-      <div className="glass-card p-4 rounded-2xl border border-white/10 space-y-3">
+      <div className="apple-card p-4 rounded-3xl space-y-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-400">
-            <Briefcase className="w-4 h-4 text-indigo-400" />
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+            <Briefcase className="w-3.5 h-3.5 text-indigo-400" />
             <span>Задачи дня (Фокус)</span>
           </div>
-          <span className="text-[11px] text-slate-500">
+          <span className="text-[11px] text-slate-500 font-mono">
             {tasks.filter((t) => t.completed).length} из {tasks.length}
           </span>
         </div>
@@ -117,11 +128,11 @@ export const WorkModule: React.FC = () => {
             value={newTaskText}
             onChange={(e) => setNewTaskText(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleAddTask()}
-            className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white"
+            className="flex-1 bg-[#1b1f2a] border border-white/[0.08] rounded-2xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
           />
           <button
             onClick={handleAddTask}
-            className="px-3 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white font-bold rounded-xl text-xs active:scale-95 transition-all"
+            className="px-4 py-2 bg-white text-slate-950 font-bold rounded-2xl text-xs active:scale-95 transition-all"
           >
             +
           </button>
@@ -133,10 +144,10 @@ export const WorkModule: React.FC = () => {
             <div
               key={task.id}
               onClick={() => toggleTask(task.id)}
-              className={`p-2.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
+              className={`p-3 rounded-2xl transition-all cursor-pointer flex items-center justify-between ${
                 task.completed
-                  ? "bg-slate-900/40 border-white/5 text-slate-500"
-                  : "bg-slate-900/80 border-white/10 text-slate-200 hover:border-indigo-500/40"
+                  ? "bg-white/[0.02] text-slate-500"
+                  : "bg-white/[0.04] text-slate-200 hover:bg-white/[0.07]"
               }`}
             >
               <div className="flex items-center gap-2.5">
@@ -145,12 +156,12 @@ export const WorkModule: React.FC = () => {
                 ) : (
                   <Circle className="w-4 h-4 text-slate-500" />
                 )}
-                <span className={`text-xs ${task.completed ? "line-through" : "font-medium"}`}>
+                <span className={`text-xs ${task.completed ? "line-through" : "font-medium text-white"}`}>
                   {task.title}
                 </span>
               </div>
               {task.priority === "high" && !task.completed && (
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-300">
                   Важно
                 </span>
               )}
@@ -161,4 +172,3 @@ export const WorkModule: React.FC = () => {
     </div>
   );
 };
-

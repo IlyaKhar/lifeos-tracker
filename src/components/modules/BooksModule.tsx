@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Book } from "@/types";
 import { StorageService } from "@/lib/storage";
-import { BookOpen, CheckCircle, Clock, Plus } from "lucide-react";
+import { BookOpen, CheckCircle2, Plus } from "lucide-react";
 import confetti from "canvas-confetti";
 
 export const BooksModule: React.FC = () => {
@@ -60,8 +60,8 @@ export const BooksModule: React.FC = () => {
   return (
     <div className="space-y-4 pb-12">
       <div className="flex items-center justify-between px-1">
-        <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-400">
-          <BookOpen className="w-4 h-4 text-purple-400" />
+        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+          <BookOpen className="w-3.5 h-3.5 text-purple-400" />
           <span>Книжная полка</span>
         </div>
         <button
@@ -74,14 +74,14 @@ export const BooksModule: React.FC = () => {
       </div>
 
       {showAdd && (
-        <div className="glass-card p-3.5 rounded-2xl border border-purple-500/40 space-y-2">
-          <span className="text-xs font-bold text-slate-200">Новая книга</span>
+        <div className="apple-card p-4 rounded-3xl space-y-2.5">
+          <span className="text-xs font-bold text-white">Новая книга</span>
           <input
             type="text"
             placeholder="Название (например: Грокаем алгоритмы)"
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
-            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white"
+            className="w-full bg-[#1b1f2a] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white"
           />
           <div className="flex gap-2">
             <input
@@ -89,19 +89,19 @@ export const BooksModule: React.FC = () => {
               placeholder="Автор"
               value={newAuthor}
               onChange={(e) => setNewAuthor(e.target.value)}
-              className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white"
+              className="flex-1 bg-[#1b1f2a] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white"
             />
             <input
               type="number"
               placeholder="Всего страниц"
               value={newTotalPages}
               onChange={(e) => setNewTotalPages(e.target.value)}
-              className="w-28 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white"
+              className="w-28 bg-[#1b1f2a] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white font-mono"
             />
           </div>
           <button
             onClick={handleAddBook}
-            className="w-full py-1.5 bg-purple-500 text-white font-bold rounded-lg text-xs"
+            className="w-full py-2 bg-purple-500 text-white font-bold rounded-xl text-xs"
           >
             Добавить на полку
           </button>
@@ -116,18 +116,18 @@ export const BooksModule: React.FC = () => {
           return (
             <div
               key={book.id}
-              className={`glass-card p-4 rounded-2xl border transition-all ${
-                isDone ? "border-emerald-500/30 bg-emerald-950/10" : "border-purple-500/20"
-              } space-y-3`}
+              className={`apple-card p-4 rounded-3xl space-y-3 ${
+                isDone ? "border-emerald-500/20" : ""
+              }`}
             >
               <div className="flex items-start justify-between">
                 <div>
-                  <h4 className="text-sm font-bold text-slate-100">{book.title}</h4>
+                  <h4 className="text-sm font-bold text-white tracking-tight">{book.title}</h4>
                   <p className="text-[11px] text-slate-400">{book.author}</p>
                 </div>
                 {isDone ? (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                    <CheckCircle className="w-3 h-3" /> Прочитано
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full">
+                    <CheckCircle2 className="w-3 h-3" /> Прочитано
                   </span>
                 ) : (
                   <span className="text-xs font-mono font-bold text-purple-400">{pct}%</span>
@@ -136,11 +136,11 @@ export const BooksModule: React.FC = () => {
 
               {/* Progress Bar */}
               <div className="space-y-1">
-                <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden border border-white/5">
+                <div className="w-full bg-white/[0.06] h-2 rounded-full overflow-hidden">
                   <div
                     style={{ width: `${pct}%` }}
                     className={`h-full rounded-full transition-all ${
-                      isDone ? "bg-emerald-400" : "bg-purple-500"
+                      isDone ? "bg-emerald-400" : "bg-purple-400"
                     }`}
                   />
                 </div>
@@ -157,19 +157,19 @@ export const BooksModule: React.FC = () => {
                 <div className="flex items-center gap-2 pt-1">
                   <button
                     onClick={() => handleUpdatePage(book.id, 10)}
-                    className="flex-1 py-1.5 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/30 text-purple-300 text-xs font-mono font-bold active:scale-95 transition-all"
+                    className="flex-1 py-1.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] text-purple-300 text-xs font-mono font-semibold active:scale-95 transition-all text-center"
                   >
                     +10 стр.
                   </button>
                   <button
                     onClick={() => handleUpdatePage(book.id, 25)}
-                    className="flex-1 py-1.5 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/30 text-purple-300 text-xs font-mono font-bold active:scale-95 transition-all"
+                    className="flex-1 py-1.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] text-purple-300 text-xs font-mono font-semibold active:scale-95 transition-all text-center"
                   >
                     +25 стр.
                   </button>
                   <button
                     onClick={() => handleUpdatePage(book.id, 50)}
-                    className="flex-1 py-1.5 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/30 text-purple-300 text-xs font-mono font-bold active:scale-95 transition-all"
+                    className="flex-1 py-1.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] text-purple-300 text-xs font-mono font-semibold active:scale-95 transition-all text-center"
                   >
                     +50 стр.
                   </button>
@@ -182,4 +182,3 @@ export const BooksModule: React.FC = () => {
     </div>
   );
 };
-
