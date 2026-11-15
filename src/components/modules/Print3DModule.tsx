@@ -33,6 +33,7 @@ export const Print3DModule: React.FC = () => {
   // Model form
   const [showAddModel, setShowAddModel] = useState(false);
   const [modelTitle, setModelTitle] = useState("");
+  const [modelQuantity, setModelQuantity] = useState("1");
   const [modelType, setModelType] = useState<PrintModelType>("custom_order");
   const [modelPrice, setModelPrice] = useState("");
   const [modelWeight, setModelWeight] = useState("");
@@ -87,14 +88,16 @@ export const Print3DModule: React.FC = () => {
   const handleSaveModel = () => {
     if (!modelTitle.trim()) return;
     const price = modelType === "custom_order" ? parseFloat(modelPrice) || 0 : 0;
-    const weight = parseInt(modelWeight) || 50;
+    const weightPerPiece = parseInt(modelWeight) || 50;
+    const qty = parseInt(modelQuantity) || 1;
 
     const item: PrintModelItem = {
       id: "pm_" + Date.now(),
       title: modelTitle.trim(),
+      quantity: qty,
       modelType,
       priceRub: price,
-      weightGrams: weight,
+      weightGrams: weightPerPiece * qty,
       spoolId: selectedSpoolId || undefined,
       status: modelStatus,
       date: new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "short" }).format(new Date()),
@@ -110,6 +113,7 @@ export const Print3DModule: React.FC = () => {
 
     setShowAddModel(false);
     setModelTitle("");
+    setModelQuantity("1");
     setModelPrice("");
     setModelWeight("");
   };
@@ -131,8 +135,13 @@ export const Print3DModule: React.FC = () => {
     .filter((m) => m.modelType === "custom_order")
     .reduce((sum, m) => sum + (m.priceRub || 0), 0);
 
-  const customOrderCount = models.filter((m) => m.modelType === "custom_order").length;
-  const forMyselfCount = models.filter((m) => m.modelType === "for_myself").length;
+  const totalPieces = models.reduce((sum, m) => sum + (m.quantity || 1), 0);
+  const customOrderCount = models
+    .filter((m) => m.modelType === "custom_order")
+    .reduce((sum, m) => sum + (m.quantity || 1), 0);
+  const forMyselfCount = models
+    .filter((m) => m.modelType === "for_myself")
+    .reduce((sum, m) => sum + (m.quantity || 1), 0);
   const totalPlasticGrams = models.reduce((sum, m) => sum + (m.weightGrams || 0), 0);
 
   const filteredModels = models.filter((m) => {
@@ -232,26 +241,33 @@ export const Print3DModule: React.FC = () => {
             </button>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             {modelType === "custom_order" ? (
               <input
                 type="number"
-                placeholder="Сколько получу в ₽"
+                placeholder="Доход в ₽"
                 value={modelPrice}
                 onChange={(e) => setModelPrice(e.target.value)}
-                className="bg-[#1b1f2a] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white font-mono"
+                className="bg-[#1b1f2a] border border-white/[0.08] rounded-xl px-2.5 py-2 text-xs text-white font-mono"
               />
             ) : (
-              <div className="bg-[#1b1f2a]/50 border border-white/[0.05] rounded-xl px-3 py-2 text-xs text-slate-400 flex items-center">
-                0 ₽ (Личное)
+              <div className="bg-[#1b1f2a]/50 border border-white/[0.05] rounded-xl px-2.5 py-2 text-xs text-slate-400 flex items-center justify-center">
+                0 ₽
               </div>
             )}
             <input
               type="number"
-              placeholder="Вес пластика (г)"
+              placeholder="Кол-во (шт)"
+              value={modelQuantity}
+              onChange={(e) => setModelQuantity(e.target.value)}
+              className="bg-[#1b1f2a] border border-white/[0.08] rounded-xl px-2.5 py-2 text-xs text-white font-mono"
+            />
+            <input
+              type="number"
+              placeholder="Вес 1 шт (г)"
               value={modelWeight}
               onChange={(e) => setModelWeight(e.target.value)}
-              className="bg-[#1b1f2a] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white font-mono"
+              className="bg-[#1b1f2a] border border-white/[0.08] rounded-xl px-2.5 py-2 text-xs text-white font-mono"
             />
           </div>
 
@@ -340,7 +356,9 @@ export const Print3DModule: React.FC = () => {
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-bold text-white truncate">{item.title}</span>
+                        <span className="text-xs font-bold text-white truncate">
+                          {item.quantity && item.quantity > 1 ? `${item.quantity} шт. • ` : ""}{item.title}
+                        </span>
                       </div>
                       <div className="text-[10px] text-slate-400 mt-0.5 flex items-center gap-2 font-mono">
                         <span>{item.weightGrams} г</span>

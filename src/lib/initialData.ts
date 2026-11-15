@@ -15,13 +15,13 @@ export const initialModules: ModuleItem[] = [
   {
     id: "3d",
     title: "3D Печать",
-    subtitle: "Катушки и очередь печати",
+    subtitle: "Катушки и журнал заказов",
     category: "3d",
     icon: "layers",
     accentColor: "orange",
     borderColor: "border-white/[0.06] hover:border-orange-500/40",
-    previewValue: "68%",
-    previewSubtext: "Корпус Raspberry Pi",
+    previewValue: "0 ₽",
+    previewSubtext: "0 шт. напечатано",
   },
   {
     id: "savings",

@@ -97,6 +97,7 @@ export type PrintModelStatus = 'in_progress' | 'completed' | 'paid';
 export interface PrintModelItem {
   id: string;
   title: string;
+  quantity?: number; // количество штук
   modelType: PrintModelType; // 'for_myself' | 'custom_order'
   priceRub: number; // сколько получу (0 если для себя)
   weightGrams: number; // расход пластика в граммах

@@ -193,6 +193,72 @@ export const GymModule: React.FC = () => {
     StorageService.saveWorkouts(updated);
   };
 
+  const handleUpdateSetWeight = (workoutId: string, exerciseId: string, setId: string, weightKg: number) => {
+    const updated = workouts.map((w) => {
+      if (w.id === workoutId) {
+        return {
+          ...w,
+          exercises: w.exercises.map((e) => {
+            if (e.id === exerciseId) {
+              return {
+                ...e,
+                sets: e.sets.map((s) => (s.id === setId ? { ...s, weightKg } : s)),
+              };
+            }
+            return e;
+          }),
+        };
+      }
+      return w;
+    });
+    setWorkouts(updated);
+    StorageService.saveWorkouts(updated);
+  };
+
+  const handleUpdateSetReps = (workoutId: string, exerciseId: string, setId: string, reps: number) => {
+    const updated = workouts.map((w) => {
+      if (w.id === workoutId) {
+        return {
+          ...w,
+          exercises: w.exercises.map((e) => {
+            if (e.id === exerciseId) {
+              return {
+                ...e,
+                sets: e.sets.map((s) => (s.id === setId ? { ...s, reps } : s)),
+              };
+            }
+            return e;
+          }),
+        };
+      }
+      return w;
+    });
+    setWorkouts(updated);
+    StorageService.saveWorkouts(updated);
+  };
+
+  const handleDeleteSet = (workoutId: string, exerciseId: string, setId: string) => {
+    const updated = workouts.map((w) => {
+      if (w.id === workoutId) {
+        return {
+          ...w,
+          exercises: w.exercises.map((e) => {
+            if (e.id === exerciseId) {
+              return {
+                ...e,
+                sets: e.sets.filter((s) => s.id !== setId),
+              };
+            }
+            return e;
+          }),
+        };
+      }
+      return w;
+    });
+    setWorkouts(updated);
+    StorageService.saveWorkouts(updated);
+  };
+
   const currentWeight = weightLogs.length > 0 ? weightLogs[weightLogs.length - 1].weightKg : 78.4;
   const startWeight = weightLogs.length > 0 ? weightLogs[0].weightKg : 79.2;
   const weightDelta = +(currentWeight - startWeight).toFixed(1);
@@ -465,30 +531,75 @@ export const GymModule: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Sets Grid */}
-                  <div className="grid grid-cols-3 gap-2 text-xs">
+                  {/* Sets List: Editable Weight & Reps */}
+                  <div className="space-y-1.5 pt-1">
                     {ex.sets.map((s) => (
-                      <button
+                      <div
                         key={s.id}
-                        onClick={() => toggleSetComplete(workout.id, ex.id, s.id)}
-                        className={`p-2.5 rounded-xl border text-left transition-all flex flex-col justify-between ${
+                        className={`p-2 rounded-2xl border flex items-center justify-between gap-2 transition-all ${
                           s.completed
-                            ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300"
-                            : "bg-white/[0.03] border-transparent text-slate-300 hover:bg-white/[0.06]"
+                            ? "bg-emerald-500/[0.08] border-emerald-500/30 text-emerald-300"
+                            : "bg-white/[0.03] border-white/[0.04] text-slate-300"
                         }`}
                       >
-                        <div className="flex items-center justify-between text-[10px] text-slate-400 mb-1">
-                          <span>Сет {s.setNumber}</span>
-                          {s.completed ? (
-                            <Check className="w-3 h-3 text-emerald-400" />
-                          ) : (
-                            <span className="text-[9px]">тап</span>
-                          )}
+                        {/* Set badge */}
+                        <span className="text-[10px] font-bold text-slate-400 w-12 flex-shrink-0">
+                          Сет {s.setNumber}
+                        </span>
+
+                        {/* Weight input */}
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="number"
+                            step="0.5"
+                            value={s.weightKg}
+                            onChange={(e) =>
+                              handleUpdateSetWeight(workout.id, ex.id, s.id, parseFloat(e.target.value) || 0)
+                            }
+                            className="w-14 bg-black/40 border border-white/[0.08] rounded-xl px-1.5 py-1 text-xs font-mono font-bold text-white text-center focus:border-emerald-500 focus:outline-none"
+                          />
+                          <span className="text-[10px] text-slate-400 font-mono">кг</span>
                         </div>
-                        <div className="font-mono font-bold text-xs">
-                          {s.weightKg} кг × {s.reps}
+
+                        <span className="text-slate-600 font-bold">×</span>
+
+                        {/* Reps input */}
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="number"
+                            value={s.reps}
+                            onChange={(e) =>
+                              handleUpdateSetReps(workout.id, ex.id, s.id, parseInt(e.target.value) || 0)
+                            }
+                            className="w-12 bg-black/40 border border-white/[0.08] rounded-xl px-1.5 py-1 text-xs font-mono font-bold text-white text-center focus:border-emerald-500 focus:outline-none"
+                          />
+                          <span className="text-[10px] text-slate-400 font-mono">повт</span>
                         </div>
-                      </button>
+
+                        {/* Complete & Delete buttons */}
+                        <div className="flex items-center gap-1 ml-auto flex-shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => toggleSetComplete(workout.id, ex.id, s.id)}
+                            className={`p-1.5 rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center gap-1 ${
+                              s.completed
+                                ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                                : "bg-white/[0.06] hover:bg-white/[0.1] text-slate-400 hover:text-white"
+                            }`}
+                            title={s.completed ? "Выполнено" : "Отметить выполненным"}
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteSet(workout.id, ex.id, s.id)}
+                            className="p-1.5 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                            title="Удалить подход"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </div>

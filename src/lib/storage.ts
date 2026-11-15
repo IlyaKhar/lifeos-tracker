@@ -168,9 +168,8 @@ export const StorageService = {
     const totalEarned = printModels
       .filter((m) => m.modelType === "custom_order")
       .reduce((sum, m) => sum + (m.priceRub || 0), 0);
-    const printSubtext = printModels.length > 0
-      ? `${printModels.length} моделей записано`
-      : "Катушки и заказы";
+    const totalPieces = printModels.reduce((sum, m) => sum + (m.quantity || 1), 0);
+    const printSubtext = totalPieces > 0 ? `${totalPieces} шт. напечатано` : "0 шт. напечатано";
 
     // 4. English
     const words = StorageService.getEnglishWords();
